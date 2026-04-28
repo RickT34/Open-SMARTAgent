@@ -7,7 +7,6 @@ from envdata import *
 from collections import defaultdict
 
 TEST_RUN = False
-PYTHON = "/share/miniconda3/envs/vllm/bin/python"
 
 
 def runner_inference_tool_prompt(env: exenv.ExpEnv):
@@ -17,7 +16,7 @@ def runner_inference_tool_prompt(env: exenv.ExpEnv):
     envr = os.environ.copy()
     envr["WORLD_SIZE"] = "1"
     method = "mistral" if "mistral" in env.model.name else "llama"
-    p = Popen(
+    p = popen_inherit_stdio(
         [
             PYTHON, "inference/inference_tool_prompt.py",
             "--model_name_or_path", env.model.path,
@@ -38,7 +37,7 @@ def runner_inference_smart(env: exenv.ExpEnv):
         return
     envr = os.environ.copy()
     envr["WORLD_SIZE"] = "1"
-    p = Popen(
+    p = popen_inherit_stdio(
         [
             PYTHON, "inference/inference_smart.py",
             "--model_name_or_path", env.model.path,
@@ -51,12 +50,12 @@ def runner_inference_smart(env: exenv.ExpEnv):
         env=envr,
     )
     p.wait()
-    
+
 def runner_inference_eval(env: exenv.ExpEnv):
     if not os.path.exists(env.get_output_path()):
         print(f"Output path {env.get_output_path()} not exists. Skipping evaluation.")
         return
-    p = Popen(
+    p = popen_inherit_stdio(
         [
             PYTHON, f"evaluate/inference_eval_{env.dataset.tags['domain']}.py",
             "--data_path", env.get_output_path(),
