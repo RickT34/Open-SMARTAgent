@@ -9,19 +9,29 @@ from .utils_serper import search_serper
 from .utils_askuser import simulate_user_response
 from .utils_code import execute_code
 
+FINAL_RESPONSE_MARKERS = ("### Final Response", "Final Answer:")
+
+
+def split_final_response(text):
+    for marker in FINAL_RESPONSE_MARKERS:
+        if marker in text:
+            prefix, suffix = text.split(marker, 1)
+            return prefix.strip(), suffix.strip()
+    return None, None
+
 
 def parse_steps(text):
     results = []
     steps = text.strip().split("\n- Step")
     steps = [step.strip() for step in steps if step.strip() != ""]
     for step in steps:
-        if "### Final Response" in step:
-            reasoning = step.split("### Final Response")[0].strip()
+        reasoning, final_output = split_final_response(step)
+        if final_output is not None:
             results.append({
                 "name": "Final Response",
                 "type": "normal",
                 "tool_name": None,
-                "reasoning": reasoning
+                "reasoning": final_output
             })
             continue
         try:
@@ -163,10 +173,10 @@ def inference(args):
                 cprint.info("\n\n", "+" * 10, "Round Response", "+" * 10)
                 print(assistant_output)
                  
-                if "### Final Response" in assistant_output:
-                    new_steps = assistant_output.split("### Final Response")[0].strip()
+                new_steps, final_output = split_final_response(assistant_output)
+                if final_output is not None:
+                    new_steps = new_steps.strip()
                     steps.extend(parse_steps(new_steps))
-                    final_output = assistant_output.split("### Final Response")[1].strip()
                 
                     steps.append({
                         "name": "Final Response",

@@ -5,6 +5,16 @@ from tqdm import tqdm
 import argparse
 from cprint import *
 
+FINAL_RESPONSE_MARKERS = ("### Final Response", "Final Answer:")
+
+
+def split_final_response(text):
+    for marker in FINAL_RESPONSE_MARKERS:
+        if marker in text:
+            prefix, suffix = text.split(marker, 1)
+            return prefix.strip(), suffix.strip()
+    return None, None
+
 
 def preprocess_dataset(data_path, max_num=-1, start_id=0, method="llama"):
     """
@@ -122,10 +132,9 @@ def inference(args):
                 cprint.info("\n\n", "+" * 10, "Round Response", "+" * 10)
                 print(assistant_output)
                 
-                if "### Final Response" not in assistant_output:
+                reasoning, final_output = split_final_response(assistant_output)
+                if final_output is None:
                     continue
-                reasoning = assistant_output.split("### Final Response")[0].strip()
-                final_output = assistant_output.split("### Final Response")[1].strip()
                 
                 steps.append({
                     "name": "Reasoning",

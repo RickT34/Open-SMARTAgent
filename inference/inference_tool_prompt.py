@@ -9,6 +9,8 @@ from .utils_serper import search_serper
 from .utils_askuser import simulate_user_response
 from .utils_code import execute_code
 
+FINAL_RESPONSE_MARKERS = ("### Final Response", "Final Answer:")
+
 
 def extract_first_parentheses_content(text):
     start = text.find('(')
@@ -42,6 +44,14 @@ def find_earliest_string(text):
     earliest_key = min(valid_occurrences, key=valid_occurrences.get)
     earliest_index = valid_occurrences[earliest_key]
     return earliest_index, earliest_key
+
+
+def split_final_response(text):
+    for marker in FINAL_RESPONSE_MARKERS:
+        if marker in text:
+            prefix, suffix = text.split(marker, 1)
+            return prefix.strip(), suffix.strip()
+    return None, None
 
 
 def parse_steps(text):
@@ -85,9 +95,8 @@ def parse_steps(text):
             }
         ]
     
-    if "Final Answer:" in text:
-        reasoning_before = text.split("Final Answer:")[0].strip()
-        reasoning_after = text.split("Final Answer:")[1].strip()
+    reasoning_before, reasoning_after = split_final_response(text)
+    if reasoning_after is not None:
         return [
             {
                 "name": "Reasoning Step",
