@@ -18,18 +18,6 @@ else:
     client = OpenAI(api_key="sk-...")
 
 
-def form_messages(task, query):
-    """
-    Format the messages for GPT interaction.
-    """
-    user_prompt = f"### Task{task}\n\n### Query\n{query}\n\n### Response\n"
-    messages = [
-        {'role': 'system', 'content': SYS_PROMPT},
-        {'role': 'user', 'content': user_prompt}
-    ]
-    return messages
-
-
 def gpt_chatcompletion(messages, model="gpt-4o"):
     """
     Perform GPT chat completion with retries.
@@ -45,32 +33,13 @@ def gpt_chatcompletion(messages, model="gpt-4o"):
                 n=1,
             )
             content = response.choices[0].message.content
-            return content.replace("### Response", "").strip()
+            return content
         except Exception as e:
             print(f"Chat Generation Error: {e}")
             time.sleep(5)
             if rounds > 3:
                 raise Exception("Chat Completion failed too many times")
 
+if __name__ == "__main__":
+    print(gpt_chatcompletion([{"role": "system", "content": SYS_PROMPT}, {"role": "user", "content": "### Task\n\n### Query\nWhat is your favorite color?\n\n### Response\n"}]))
 
-def simulate_user_response(task, query, model="gpt-4o"):
-    """
-    Simulate a user response to a query within a given task.
-    
-    Parameters:
-    - task: The context or task description for the reasoning process.
-    - query: The reasoning query chain to which GPT will respond.
-    - model: The GPT model to use (default is "gpt-4o-mini").
-    
-    Returns:
-    - The simulated user response.
-    """
-    try:
-        # Format the messages
-        messages = form_messages(task, query)
-        # Call GPT and get the response
-        response = gpt_chatcompletion(messages, model=model)
-        return response
-    except Exception as e:
-        print(f"Error in simulate_user_response: {e}")
-        return None

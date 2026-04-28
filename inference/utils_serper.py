@@ -2,7 +2,7 @@ import http.client
 import json
 import time
 
-api_key = json.load(open("../secret.json"))["serper_key"]
+api_key = json.load(open("./secret.json"))["serper_key"]
 
 conn = http.client.HTTPSConnection("google.serper.dev")
 headers = {

@@ -39,10 +39,10 @@ USER_PROMPT = """- Model response: <pd>
 - Ground truth: <gt>
 - Judgment: """
 
-if os.path.exists("../secret.json"):
+if os.path.exists("./secret.json"):
     client = OpenAI(
-        api_key=json.load(open("../secret.json"))["api_key"],
-        base_url=json.load(open("../secret.json"))["base_url"]
+        api_key=json.load(open("./secret.json"))["api_key"],
+        base_url=json.load(open("./secret.json"))["base_url"]
     )
 else:
     client = OpenAI(api_key="sk-...")
@@ -129,11 +129,17 @@ def main(data, answered_data, hash_tab, save_path, log, model):
     return
 
 
+import argparse
 if __name__ == '__main__':
-    data_path = f"PATH/TO/INFERENCE/DATA.json"
+    argparser = argparse.ArgumentParser()
+    argparser.add_argument("--data_path", type=str, required=True, help="Path to the inference data JSON file")
+    argparser.add_argument("--save_path", type=str, required=True, help="Path to save the judged results JSON file")
+    args = argparser.parse_args()
+
+    data_path = args.data_path
     all_data = json.load(open(data_path))
-    
-    save_path = data_path.replace(".json", "_judge.json")
+
+    save_path = args.save_path
     if os.path.exists(save_path):
         with open(save_path, 'r') as f:
             answered_data = json.load(f)

@@ -52,10 +52,10 @@ USER_PROMPT_SUMMARY = """- Summary: <summary>
 - User preference: <user_preference>
 """
 
-if os.path.exists("../secret.json"):
+if os.path.exists("./secret.json"):
     client = OpenAI(
-        api_key=json.load(open("../secret.json"))["api_key"],
-        base_url=json.load(open("../secret.json"))["base_url"]
+        api_key=json.load(open("./secret.json"))["api_key"],
+        base_url=json.load(open("./secret.json"))["base_url"]
     )
 else:
     client = OpenAI(api_key="sk-...")
@@ -172,16 +172,22 @@ def main(data, answered_data, hash_tab, save_path, log, model):
     print(log)
     return
 
+import argparse
 
 if __name__ == '__main__':
-    ref_path = "../data_inference/domain_intention_smart.json"
+    argparser = argparse.ArgumentParser()
+    argparser.add_argument("--data_path", type=str, required=True, help="Path to the inference data JSON file")
+    argparser.add_argument("--save_path", type=str, required=True, help="Path to save the judged results JSON file")
+    args = argparser.parse_args()
+    
+    ref_path = "./data_inference/domain_intention_smart.json"
     ref_data = {}
     for data in json.load(open(ref_path)):
         task = data["input"].split("### Task")[1].split("###")[0].strip()
         missing_details = data["missing_details"]
         ref_data[task] = missing_details
         
-    data_path = f"PATH/TO/INFERENCE/DATA.json"
+    data_path = args.data_path
     all_data = json.load(open(data_path))
     
     for data in all_data:
@@ -190,7 +196,7 @@ if __name__ == '__main__':
         assert missing_details != [], f"Missing details not found for task: {task}"
         data['missing_details'] = missing_details        
         
-    save_path = data_path.replace(".json", "_judge.json")
+    save_path = args.save_path
     if os.path.exists(save_path):
         with open(save_path, 'r') as f:
             answered_data = json.load(f)
