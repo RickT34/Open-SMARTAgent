@@ -5,9 +5,9 @@ from tqdm import tqdm
 import argparse
 from cprint import *
 
-from .utils_serper import search_serper
-from .utils_askuser import simulate_user_response
-from .utils_code import execute_code
+from utils_serper import search_serper
+from utils_askuser import simulate_user_response
+from utils_code import execute_code
 
 FINAL_RESPONSE_MARKERS = ("### Final Response", "Final Answer:")
 

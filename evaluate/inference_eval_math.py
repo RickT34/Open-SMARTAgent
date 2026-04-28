@@ -67,7 +67,7 @@ def gpt_chatcompletion(messages, model="gpt-4o-mini"):
                 n=1,
             )
             content = response.choices[0].message.content
-            return content.strip()
+            return content.split("</think>")[-1].strip()
         except Exception as e:
             print(f"Chat Generation Error: {e}")
             time.sleep(5)

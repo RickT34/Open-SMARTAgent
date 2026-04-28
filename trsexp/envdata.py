@@ -1,7 +1,7 @@
 from lazyexp.exenv import *
 from typing import TYPE_CHECKING
 
-DIR_DATA = "/share/exps/trsdata"
+DIR_DATA = "/share/trsdata/trsdata"
 
 ModelLLaMA31_8B = ModelEnv(
     "llama3.1-8b",

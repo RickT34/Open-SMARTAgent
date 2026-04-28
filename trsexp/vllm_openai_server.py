@@ -21,15 +21,22 @@ PROXY_HOST = "127.0.0.1"
 PROXY_PORT = 9000
 REQUEST_TIMEOUT = 600
 WAIT_BACKEND_TIMEOUT = 1800
-DIR_DATA = "/share/exps/trsdata"
+DIR_DATA = "/share/trsdata/trsdata"
 
 BACKENDS = {
     "big": {
-        "source_model": f"{DIR_DATA}/models/Qwen3.5-27B",
-        "served_model_name": "qwen-27b",
+        # "source_model": f"{DIR_DATA}/models/Qwen3.5-27B",
+        # "served_model_name": "qwen-27b",
+        "source_model": f"{DIR_DATA}/models/Qwen2.5-7B-Instruct",
+        "served_model_name": "qwen-7b",
         "host": "127.0.0.1",
         "port": 8001,
-        "vllm_args": ["--max_model_len 16384"],
+        "vllm_args": [
+            "--gpu-memory-utilization", "0.95",
+            "--max-model-len", "32768",
+            "--max-num-seqs", "16",
+            "--tensor-parallel-size", str(len(os.environ["CUDA_VISIBLE_DEVICES"].split(",")))
+        ],
     },
 }
 
@@ -64,6 +71,11 @@ class BackendSpec:
     @property
     def base_url(self) -> str:
         return f"http://{self.host}:{self.port}/v1"
+
+    @property
+    def is_local_path(self) -> bool:
+        source = self.source_model
+        return source.startswith("/") or source.startswith("./") or source.startswith("../") or source.startswith("~")
 
 
 @dataclass
@@ -107,12 +119,48 @@ class ManagedProcess:
             self.process.wait(timeout=5)
 
 
+def resolve_model_source(source_model: str) -> str:
+    path_like = (
+        source_model.startswith("/")
+        or source_model.startswith("./")
+        or source_model.startswith("../")
+        or source_model.startswith("~")
+    )
+    if not path_like:
+        return source_model
+
+    candidate = Path(source_model).expanduser()
+    if not candidate.exists():
+        raise FileNotFoundError(
+            "你配置的是本地模型路径，但目录不存在:\n"
+            f"  {candidate}\n"
+            "请确认这是不是实际模型目录，而不是别的机器上的路径、挂载前路径，或父目录。"
+        )
+    if not candidate.is_dir():
+        raise FileNotFoundError(
+            "你配置的本地模型路径不是目录:\n"
+            f"  {candidate}"
+        )
+
+    required_files = ["config.json"]
+    missing_files = [name for name in required_files if not (candidate / name).exists()]
+    if missing_files:
+        raise FileNotFoundError(
+            "这个目录看起来不像 Hugging Face 模型目录，至少缺少这些文件:\n"
+            f"  {', '.join(missing_files)}\n"
+            f"当前目录: {candidate}\n"
+            "通常你需要把 source_model 指向真正包含 config.json / tokenizer.json / model.safetensors 的那一层目录。"
+        )
+
+    return str(candidate.resolve())
+
+
 def build_config() -> ProxyConfig:
     backends: dict[str, BackendSpec] = {}
     for name, raw in BACKENDS.items():
         backends[name] = BackendSpec(
             name=name,
-            source_model=raw["source_model"],
+            source_model=resolve_model_source(raw["source_model"]),
             served_model_name=raw["served_model_name"],
             host=raw.get("host", "127.0.0.1"),
             port=int(raw["port"]),
@@ -151,6 +199,8 @@ def pick_vllm_command(backend: BackendSpec) -> list[str]:
             str(backend.port),
             "--served-model-name",
             backend.served_model_name,
+            "--tokenizer",
+            backend.source_model,
             *backend.vllm_args,
         ]
 
@@ -170,6 +220,8 @@ def pick_vllm_command(backend: BackendSpec) -> list[str]:
         "-m",
         "vllm.entrypoints.openai.api_server",
         "--model",
+        backend.source_model,
+        "--tokenizer",
         backend.source_model,
         "--host",
         backend.host,

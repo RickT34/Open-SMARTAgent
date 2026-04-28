@@ -6,7 +6,8 @@ import typing
 from envdata import *
 from collections import defaultdict
 
-TEST_RUN = True
+TEST_RUN = False
+PYTHON = "/share/miniconda3/envs/vllm/bin/python"
 
 
 def runner_inference_tool_prompt(env: exenv.ExpEnv):
@@ -18,14 +19,14 @@ def runner_inference_tool_prompt(env: exenv.ExpEnv):
     method = "mistral" if "mistral" in env.model.name else "llama"
     p = Popen(
         [
-            f"python inference/inference_tool_prompt.py",
-            f"--model_name_or_path {env.model.path}",
-            f"--data_path {env.dataset.path}",
-            f"--max_seq_length 4096",
-            f"--save_path {env.get_output_path()}",
-            f"--test_start_id 0",
-            f"--max_test_num {-1 if not TEST_RUN else 3}",
-            f"--method {method}",
+            PYTHON, "inference/inference_tool_prompt.py",
+            "--model_name_or_path", env.model.path,
+            "--data_path" ,env.dataset.path,
+            "--max_seq_length", "4096",
+            "--save_path", env.get_output_path(),
+            "--test_start_id", "0",
+            "--max_test_num",  f"{-1 if not TEST_RUN else 3}",
+            "--method", method,
         ],
         env=envr,
     )
@@ -39,27 +40,27 @@ def runner_inference_smart(env: exenv.ExpEnv):
     envr["WORLD_SIZE"] = "1"
     p = Popen(
         [
-            f"python inference/inference_smart.py",
-            f"--model_name_or_path {env.model.path}",
-            f"--data_path {env.dataset.path}",
-            f"--max_seq_length 4096",
-            f"--save_path {env.get_output_path()}",
-            f"--test_start_id 0",
-            f"--max_test_num {-1 if not TEST_RUN else 3}",
+            PYTHON, "inference/inference_smart.py",
+            "--model_name_or_path", env.model.path,
+            "--data_path", env.dataset.path,
+            "--max_seq_length", "4096",
+            "--save_path", env.get_output_path(),
+            "--test_start_id", "0",
+            "--max_test_num",  f"{-1 if not TEST_RUN else 3}",
         ],
         env=envr,
     )
     p.wait()
     
 def runner_inference_eval(env: exenv.ExpEnv):
-    if os.path.exists(env.get_output_path()):
-        print(f"Output path {env.get_output_path()} already exists. Skipping evaluation.")
+    if not os.path.exists(env.get_output_path()):
+        print(f"Output path {env.get_output_path()} not exists. Skipping evaluation.")
         return
     p = Popen(
         [
-            f"python evaluate/inference_eval_{env.dataset.tags['domain']}.py",
-            f"--data_path {env.get_output_path()}",
-            f"--save_path {env.get_output_path('smart_judged.json')}",
+            PYTHON, f"evaluate/inference_eval_{env.dataset.tags['domain']}.py",
+            "--data_path", env.get_output_path(),
+            "--save_path", env.get_output_path("smart_judged.json"),
         ],
     )
     p.wait()
