@@ -4,7 +4,7 @@ import time
 
 api_key = json.load(open("./secret.json"))["serper_key"]
 
-conn = http.client.HTTPSConnection("google.serper.dev")
+conn = http.client.HTTPSConnection("127.0.0.1:8765")
 headers = {
   'X-API-KEY': api_key,
   'Content-Type': 'application/json'
