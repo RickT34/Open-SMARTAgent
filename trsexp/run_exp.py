@@ -42,12 +42,12 @@ def exp_inference_no_tool():
             [AlgoNULL],
             "base_no_tool"
         )
-    tasks = exper.gen_tasks(
-        envs,
-        vllm_runner,
-        "no_tool"
-    )
-    exper.run_tasks(tasks, ui=False)
+    # tasks = exper.gen_tasks(
+    #     envs,
+    #     vllm_runner,
+    #     "no_tool"
+    # )
+    # exper.run_tasks(tasks, ui=False)
     ##Judge
     llm_judge = runners.LLMEvaluator(
         ModelQwen35_27B,
