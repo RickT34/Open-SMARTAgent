@@ -62,7 +62,7 @@ def parse_args() -> argparse.Namespace:
     )
     parser.add_argument(
         "--secret-file",
-        default="Open-SMARTAgent/secret.json",
+        default="secret.json",
         help="OpenAI-compatible secret file with api_key and base_url.",
     )
     parser.add_argument(
