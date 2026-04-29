@@ -50,7 +50,7 @@ def exp_inference_no_tool():
     # exper.run_tasks(tasks, ui=False)
     ##Judge
     llm_judge = runners.LLMEvaluator(
-        ModelQwen35_27B,
+        ModelQwen35_32B_AWQ,
         PROMPT_SMART_JUDGE,
         vllm_runner,
         model_output_field="model_output"

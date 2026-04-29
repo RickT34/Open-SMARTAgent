@@ -20,7 +20,7 @@ ModelMistral_7B = ModelEnv(
 
 ModelQwen35_27B = ModelEnv("qwen3.5-27b", f"{DIR_DATA}/models/Qwen3.5-27B", 32, tags={"vllm_args": {"max_num_seqs":64}})
 
-ModelQwen35_32B_AWQ = ModelEnv("qwen3-32b-awq", f"{DIR_DATA}/models/Qwen3-32B-AWQ", 32, tags={"vllm_args": {"max_num_seqs":256}})
+ModelQwen35_32B_AWQ = ModelEnv("qwen3-32b-awq", f"{DIR_DATA}/models/Qwen3-32B-AWQ", 32, tags={"vllm_args": {"max_num_seqs":64}})
 
 AlgoNULL = AlgoEnv("null", {})
 

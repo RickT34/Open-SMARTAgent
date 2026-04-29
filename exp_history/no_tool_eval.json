@@ -4,6 +4,7 @@
             "name": "llama3.1-8b",
             "path": "/share/trsdata/trsdata/models/Llama-3.1-8B-Instruct/",
             "layers": 32,
+            "thinking": null,
             "tags": {},
             "filetype": "hf"
         },
@@ -31,6 +32,7 @@
             "name": "llama3.1-8b",
             "path": "/share/trsdata/trsdata/models/Llama-3.1-8B-Instruct/",
             "layers": 32,
+            "thinking": null,
             "tags": {},
             "filetype": "hf"
         },
@@ -58,6 +60,7 @@
             "name": "llama3.1-8b",
             "path": "/share/trsdata/trsdata/models/Llama-3.1-8B-Instruct/",
             "layers": 32,
+            "thinking": null,
             "tags": {},
             "filetype": "hf"
         },
@@ -85,6 +88,7 @@
             "name": "mistral-7b",
             "path": "/share/trsdata/trsdata/models/Mistral-7B-Instruct-v0.3",
             "layers": 32,
+            "thinking": null,
             "tags": {},
             "filetype": "hf"
         },
@@ -112,6 +116,7 @@
             "name": "mistral-7b",
             "path": "/share/trsdata/trsdata/models/Mistral-7B-Instruct-v0.3",
             "layers": 32,
+            "thinking": null,
             "tags": {},
             "filetype": "hf"
         },
@@ -139,6 +144,7 @@
             "name": "mistral-7b",
             "path": "/share/trsdata/trsdata/models/Mistral-7B-Instruct-v0.3",
             "layers": 32,
+            "thinking": null,
             "tags": {},
             "filetype": "hf"
         },
@@ -166,6 +172,7 @@
             "name": "llama3.1-8b-smartagent",
             "path": "/share/trsdata/trsdata/models/SMART/SMARTAgent-Llama-3.1-8B/",
             "layers": 32,
+            "thinking": null,
             "tags": {},
             "filetype": "hf"
         },
@@ -193,6 +200,7 @@
             "name": "llama3.1-8b-smartagent",
             "path": "/share/trsdata/trsdata/models/SMART/SMARTAgent-Llama-3.1-8B/",
             "layers": 32,
+            "thinking": null,
             "tags": {},
             "filetype": "hf"
         },
@@ -220,6 +228,7 @@
             "name": "llama3.1-8b-smartagent",
             "path": "/share/trsdata/trsdata/models/SMART/SMARTAgent-Llama-3.1-8B/",
             "layers": 32,
+            "thinking": null,
             "tags": {},
             "filetype": "hf"
         },
@@ -247,6 +256,7 @@
             "name": "mistral-7b-smartagent",
             "path": "/share/trsdata/trsdata/models/SMART/SMARTAgent-Mistral-7B-Instruct-v0.3",
             "layers": 32,
+            "thinking": null,
             "tags": {},
             "filetype": "hf"
         },
@@ -274,6 +284,7 @@
             "name": "mistral-7b-smartagent",
             "path": "/share/trsdata/trsdata/models/SMART/SMARTAgent-Mistral-7B-Instruct-v0.3",
             "layers": 32,
+            "thinking": null,
             "tags": {},
             "filetype": "hf"
         },
@@ -301,6 +312,7 @@
             "name": "mistral-7b-smartagent",
             "path": "/share/trsdata/trsdata/models/SMART/SMARTAgent-Mistral-7B-Instruct-v0.3",
             "layers": 32,
+            "thinking": null,
             "tags": {},
             "filetype": "hf"
         },
