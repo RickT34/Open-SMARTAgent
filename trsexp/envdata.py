@@ -2,6 +2,7 @@ from lazyexp.exenv import *
 from typing import TYPE_CHECKING
 from subprocess import Popen
 import sys
+from lazyexp import runners, exper
 
 DIR_DATA = "/share/trsdata/trsdata"
 
@@ -25,20 +26,10 @@ AlgoNULL = AlgoEnv("null", {})
 PYTHON = "/share/miniconda3/envs/vllm/bin/python"
 
 
-def popen_inherit_stdio(*args, **kwargs):
-    kwargs.setdefault("stdin", sys.stdin)
-    kwargs.setdefault("stdout", sys.stdout)
-    kwargs.setdefault("stderr", sys.stderr)
-    return Popen(*args, **kwargs)
-
-
-def runner_vllmeval(env: ExpEnv):
-    if os.path.exists(env.get_output_path()):
-        print(
-            f"Output path {env.get_output_path()} already exists. Skipping inference."
-        )
-        return
-    p = popen_inherit_stdio(
-        [PYTHON, "-m", "lazyexp.vllmeval", "--env", env.get_output_path("env.json")],
-    )
-    p.wait()
+@runners.skip_if_output_exists
+@runners.cmd_runner
+def vllm_runner(env: ExpEnv):
+    return [
+        PYTHON, "-m", "lazyexp.vllmeval",
+        "--env", env.get_output_path("env.json"),
+    ]

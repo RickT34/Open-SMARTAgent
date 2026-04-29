@@ -9,15 +9,10 @@ from collections import defaultdict
 TEST_RUN = False
 
 
+@runners.skip_if_output_exists
+@runners.cmd_runner
 def runner_inference_tool_prompt(env: exenv.ExpEnv):
-    if os.path.exists(env.get_output_path()):
-        print(f"Output path {env.get_output_path()} already exists. Skipping inference.")
-        return
-    envr = os.environ.copy()
-    envr["WORLD_SIZE"] = "1"
-    method = "mistral" if "mistral" in env.model.name else "llama"
-    p = popen_inherit_stdio(
-        [
+    return [
             PYTHON, "inference/inference_tool_prompt.py",
             "--model_name_or_path", env.model.path,
             "--data_path" ,env.dataset.path,
@@ -25,20 +20,14 @@ def runner_inference_tool_prompt(env: exenv.ExpEnv):
             "--save_path", env.get_output_path(),
             "--test_start_id", "0",
             "--max_test_num",  f"{-1 if not TEST_RUN else 3}",
-            "--method", method,
-        ],
-        env=envr,
-    )
-    p.wait()
+            "--method", "mistral" if "mistral" in env.model.name else "llama",
+        ]
 
+
+@runners.skip_if_output_exists
+@runners.cmd_runner
 def runner_inference_smart(env: exenv.ExpEnv):
-    if os.path.exists(env.get_output_path()):
-        print(f"Output path {env.get_output_path()} already exists. Skipping inference.")
-        return
-    envr = os.environ.copy()
-    envr["WORLD_SIZE"] = "1"
-    p = popen_inherit_stdio(
-        [
+    return [
             PYTHON, "inference/inference_smart.py",
             "--model_name_or_path", env.model.path,
             "--data_path", env.dataset.path,
@@ -46,23 +35,16 @@ def runner_inference_smart(env: exenv.ExpEnv):
             "--save_path", env.get_output_path(),
             "--test_start_id", "0",
             "--max_test_num",  f"{-1 if not TEST_RUN else 3}",
-        ],
-        env=envr,
-    )
-    p.wait()
+        ]
 
+@runners.skip_if_output_exists
+@runners.cmd_runner
 def runner_inference_eval(env: exenv.ExpEnv):
-    if not os.path.exists(env.get_output_path()):
-        print(f"Output path {env.get_output_path()} not exists. Skipping evaluation.")
-        return
-    p = popen_inherit_stdio(
-        [
+    return [
             PYTHON, f"evaluate/inference_eval_{env.dataset.tags['domain']}.py",
             "--data_path", env.get_output_path(),
             "--save_path", env.get_output_path("smart_judged.json"),
-        ],
-    )
-    p.wait()
+        ]
 
 Datasets_Domain_Tool = []
 Datasets_Domain_Smart = []

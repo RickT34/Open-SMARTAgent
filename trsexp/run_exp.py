@@ -1,6 +1,6 @@
 from envdata import *
 from envdata_smart import *
-from lazyexp import exper, exenv, evaluator
+from lazyexp import exper, exenv, runners
 import os
 
 
@@ -44,23 +44,23 @@ def exp_inference_no_tool():
         )
     tasks = exper.gen_tasks(
         envs,
-        runner_vllmeval,
+        vllm_runner,
         "no_tool"
     )
-    # exper.run_tasks(tasks, ui=False)
+    exper.run_tasks(tasks, ui=False)
     ##Judge
-    llm_judge = evaluator.LLMEvaluator(
+    llm_judge = runners.LLMEvaluator(
         ModelQwen35_27B,
         PROMPT_SMART_JUDGE,
-        runner_vllmeval,
+        vllm_runner,
         model_output_field="model_output"
     )
     tasks_judge = exper.gen_tasks(
         envs,
-        llm_judge.evaluate,
+        llm_judge.runner,
         "no_tool_eval"
     )
     exper.run_tasks(tasks_judge, ui=False)
     
-exp_inference_tool()
-# exp_inference_no_tool()
+# exp_inference_tool()
+exp_inference_no_tool()
