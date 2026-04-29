@@ -29,6 +29,9 @@ BACKENDS = {
         # "served_model_name": "qwen-27b",
         "source_model": f"{DIR_DATA}/models/Qwen2.5-7B-Instruct",
         "served_model_name": "qwen-7b",
+        # 对 Qwen3/Qwen3.5 这类支持 thinking 开关的模型，
+        # 设为 False 可默认关闭长推理；None 表示不干预模型默认行为。
+        "enable_thinking": False,
         "host": "127.0.0.1",
         "port": 8001,
         "vllm_args": [
@@ -43,10 +46,13 @@ BACKENDS = {
 MODEL_ALIASES = {
     "gpt-4o": {
         "backend": "big",
+        # 别名级开关优先级高于 backend 默认值。
+        "enable_thinking": None,
         "extra_body": {},
     },
     "gpt-4o-mini": {
         "backend": "big",
+        "enable_thinking": None,
         "extra_body": {},
     },
 }
@@ -66,6 +72,7 @@ class BackendSpec:
     served_model_name: str
     host: str
     port: int
+    enable_thinking: bool | None = None
     vllm_args: list[str] = field(default_factory=list)
 
     @property
@@ -82,6 +89,7 @@ class BackendSpec:
 class AliasSpec:
     alias: str
     backend_name: str
+    enable_thinking: bool | None = None
     extra_body: dict[str, Any] = field(default_factory=dict)
 
 
@@ -164,6 +172,7 @@ def build_config() -> ProxyConfig:
             served_model_name=raw["served_model_name"],
             host=raw.get("host", "127.0.0.1"),
             port=int(raw["port"]),
+            enable_thinking=raw.get("enable_thinking"),
             vllm_args=list(raw.get("vllm_args", [])),
         )
 
@@ -175,6 +184,7 @@ def build_config() -> ProxyConfig:
         aliases[alias] = AliasSpec(
             alias=alias,
             backend_name=backend_name,
+            enable_thinking=raw.get("enable_thinking"),
             extra_body=raw.get("extra_body", {}) or {},
         )
 
@@ -187,6 +197,13 @@ def build_config() -> ProxyConfig:
 
 
 def pick_vllm_command(backend: BackendSpec) -> list[str]:
+    default_chat_template_args: list[str] = []
+    if backend.enable_thinking is not None:
+        default_chat_template_args = [
+            "--default-chat-template-kwargs",
+            json.dumps({"enable_thinking": backend.enable_thinking}),
+        ]
+
     vllm_exe = shutil.which("vllm")
     if vllm_exe:
         return [
@@ -201,6 +218,7 @@ def pick_vllm_command(backend: BackendSpec) -> list[str]:
             backend.served_model_name,
             "--tokenizer",
             backend.source_model,
+            *default_chat_template_args,
             *backend.vllm_args,
         ]
 
@@ -229,6 +247,7 @@ def pick_vllm_command(backend: BackendSpec) -> list[str]:
         str(backend.port),
         "--served-model-name",
         backend.served_model_name,
+        *default_chat_template_args,
         *backend.vllm_args,
     ]
 
@@ -260,6 +279,20 @@ def merge_extra_body(payload: dict[str, Any], extra_body: dict[str, Any]) -> dic
     merged = dict(payload)
     for key, value in extra_body.items():
         merged.setdefault(key, value)
+    return merged
+
+
+def merge_chat_template_kwargs(
+    payload: dict[str, Any],
+    enable_thinking: bool | None,
+) -> dict[str, Any]:
+    if enable_thinking is None:
+        return payload
+
+    merged = dict(payload)
+    chat_template_kwargs = dict(merged.get("chat_template_kwargs") or {})
+    chat_template_kwargs.setdefault("enable_thinking", enable_thinking)
+    merged["chat_template_kwargs"] = chat_template_kwargs
     return merged
 
 
@@ -448,6 +481,7 @@ def create_app(config: ProxyConfig) -> FastAPI:
         if payload is not None:
             payload["model"] = backend.served_model_name
             payload = merge_extra_body(payload, alias.extra_body)
+            payload = merge_chat_template_kwargs(payload, alias.enable_thinking)
             body = json.dumps(payload, ensure_ascii=False).encode("utf-8")
 
         upstream_url = f"{backend.base_url}/{path}"
