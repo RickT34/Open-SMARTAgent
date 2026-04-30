@@ -94,7 +94,7 @@ ModelMistral_7B_SMARTAgent = ModelEnv(
     32,
 )
 
-MODELS_BASE = [ModelLLaMA31_8B, ModelMistral_7B]
+MODELS_BASE = [ModelLLaMA31_8B, ModelMistral_7B, ModelQwen25_7B]
 MODELS_SMART = [ModelLLaMA31_8B_SMARTAgent, ModelMistral_7B_SMARTAgent]
 
 PROMPT_SMART_JUDGE = """You are a helpful assistant to jusge whether the model's final response (might be word, phrase or sentence) and the given correct answer is same in value.

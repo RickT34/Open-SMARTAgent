@@ -17,6 +17,10 @@ ModelMistral_7B = ModelEnv(
     "mistral-7b", f"{DIR_DATA}/models/Mistral-7B-Instruct-v0.3", 32
 )
 
+ModelQwen25_7B = ModelEnv(
+    "qwen2.5-7b", f"{DIR_DATA}/models/Qwen2.5-7B-Instruct", 32
+)
+
 
 ModelQwen35_27B = ModelEnv("qwen3.5-27b", f"{DIR_DATA}/models/Qwen3.5-27B", 32, tags={"vllm_args": {"max_num_seqs":64}})
 
