@@ -8,43 +8,68 @@ from collections import defaultdict
 
 TEST_RUN = False
 
+runner_inference_tool_prompt = runners.CmdExec(
+    lambda env: [
+        PYTHON,
+        "inference/inference_tool_prompt.py",
+        "--model_name_or_path",
+        env.model.path,
+        "--data_path",
+        env.dataset.path,
+        "--max_seq_length",
+        "4096",
+        "--save_path",
+        env.get_output_path().as_posix(),
+        "--test_start_id",
+        "0",
+        "--max_test_num",
+        "-1",
+        "--method",
+        "mistral" if "mistral" in env.model.name else "llama",
+    ],
+    [],
+    [Path("result.json")],
+    name="inference_tool_prompt",
+)
 
 
-@runners.cmd_runner
-def runner_inference_tool_prompt(env: exenv.ExpEnv):
-    return [
-            PYTHON, "inference/inference_tool_prompt.py",
-            "--model_name_or_path", env.model.path,
-            "--data_path" ,env.dataset.path,
-            "--max_seq_length", "4096",
-            "--save_path", env.get_output_path(),
-            "--test_start_id", "0",
-            "--max_test_num",  "-1",
-            "--method", "mistral" if "mistral" in env.model.name else "llama",
-        ]
+runner_inference_smart = runners.CmdExec(
+    lambda env: [
+        PYTHON,
+        "inference/inference_smart.py",
+        "--model_name_or_path",
+        env.model.path,
+        "--data_path",
+        env.dataset.path,
+        "--max_seq_length",
+        "4096",
+        "--save_path",
+        env.get_output_path().as_posix(),
+        "--test_start_id",
+        "0",
+        "--max_test_num",
+        "-1",
+    ],
+    [],
+    [Path("result.json")],
+    name="inference_smart",
+)
 
 
+runner_inference_eval = runners.CmdExec(
+    lambda env: [
+        PYTHON,
+        f"evaluate/inference_eval_{env.dataset.tags['domain']}.py",
+        "--data_path",
+        env.get_output_path().as_posix(),
+        "--save_path",
+        env.get_output_path("smart_judged.json").as_posix(),
+    ],
+    [Path("result.json")],
+    [Path("smart_judged.json")],
+    name="inference_eval",
+)
 
-@runners.cmd_runner
-def runner_inference_smart(env: exenv.ExpEnv):
-    return [
-            PYTHON, "inference/inference_smart.py",
-            "--model_name_or_path", env.model.path,
-            "--data_path", env.dataset.path,
-            "--max_seq_length", "4096",
-            "--save_path", env.get_output_path(),
-            "--test_start_id", "0",
-            "--max_test_num",  "-1",
-        ]
-
-
-@runners.cmd_runner
-def runner_inference_eval(env: exenv.ExpEnv):
-    return [
-            PYTHON, f"evaluate/inference_eval_{env.dataset.tags['domain']}.py",
-            "--data_path", env.get_output_path(),
-            "--save_path", env.get_output_path("smart_judged.json"),
-        ]
 
 # runner_inference_eval = runners.skip_if_output_exists(runner_inference_eval, "smart_judged.json")
 
@@ -58,18 +83,18 @@ for file in os.listdir("data_inference"):
     name = f"Dataset_{file.split('.')[0]}"
     # if "time" in name or "mint" in name:
     #     continue
-    if 'intention' in name:
+    if "intention" in name:
         domain = "intention"
-    elif 'math' in name or 'gsm' in name:
+    elif "math" in name or "gsm" in name:
         domain = "math"
     else:
-        domain = 'time'
+        domain = "time"
     d = DatasetEnv(
         f"data_inference/{file}",
         filetype="json",
         name=name,
         prompt_template=PROMPT_SMART_BASE + "\n\n{input}\n\n",
-        tags={"domain": domain}
+        tags={"domain": domain},
     )
     if "tool_prompt" in file:
         if "ood" in file:

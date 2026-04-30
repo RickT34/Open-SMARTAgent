@@ -28,13 +28,4 @@ ModelQwen35_32B_AWQ = ModelEnv("qwen3-32b-awq", f"{DIR_DATA}/models/Qwen3-32B-AW
 
 AlgoNULL = AlgoEnv("null", {})
 
-PYTHON = "/share/miniconda3/envs/vllm/bin/python"
-
-
-@runners.skip_if_output_exists
-@runners.cmd_runner
-def vllm_runner(env: ExpEnv):
-    return [
-        PYTHON, "-m", "lazyexp.vllmeval",
-        "--env", env.get_output_path("env.json"),
-    ]
+PYTHON = sys.executable
