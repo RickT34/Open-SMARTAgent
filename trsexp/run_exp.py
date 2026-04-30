@@ -24,12 +24,10 @@ def exp_inference_tool(judge:bool=True):
         tasks = exper.gen_tasks(
             envs_base,
             runner_inference_tool_prompt,
-            "tool_prompt"
         )
         tasks += exper.gen_tasks(
             envs_smart,
             runner_inference_smart,
-            "tool_prompt_smart"
         )
     else:
         ##Judge
@@ -39,7 +37,6 @@ def exp_inference_tool(judge:bool=True):
         tasks = exper.gen_tasks(
             envs,
             runner_inference_eval,
-            "tool_prompt_eval"
         )
     exper.run_tasks(tasks, ui=False)
     
@@ -51,20 +48,22 @@ def exp_inference_no_tool():
             [AlgoNULL],
             "base_no_tool"
         )
+    
     workflow = runners.Workflow(
-        "no_tool_workflow",
+        "base_no_tool",
         [
             runners.EmvDump(),
             *runners.prefab_vllmeval(),
-            *runners.prefab_llmjudge(ModelQwen35_32B_AWQ, PROMPT_SMART_JUDGE, model_output_field="model_output"),
+            *runners.prefab_llmeval(ModelQwen35_32B_AWQ, PROMPT_SMART_JUDGE, model_output_field="model_output"),
+            runners.LineCheck(line_check_judge, "llmeval/result.json", "llmeval/result_cleared.json"),
+            runners.BinSum("llmeval/result_cleared.json", "llmeval/result_summary.json"),
         ],
         True
     )
     workflow.info()
     tasks = exper.gen_tasks(
         envs,
-        workflow,
-        "no_tool"
+        workflow
     )
     # exper.run_tasks(tasks)
     

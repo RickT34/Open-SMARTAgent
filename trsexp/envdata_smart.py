@@ -134,3 +134,9 @@ PROMPT_SMART_JUDGE = """You are a helpful assistant to jusge whether the model's
 {output}
 
 - Judgment: """
+
+def line_check_judge(model_output, sample):
+    last_line = model_output.strip().split("\n")[-1].strip()
+    if last_line in ["Correct", "Wrong"]:
+        return last_line.lower()
+    return "unclear"
