@@ -51,25 +51,21 @@ def exp_inference_no_tool():
             [AlgoNULL],
             "base_no_tool"
         )
+    workflow = runners.Workflow(
+        "no_tool_workflow",
+        [
+            runners.EmvDump(),
+            *runners.prefab_vllmeval(),
+            *runners.prefab_llmjudge(ModelQwen35_32B_AWQ, PROMPT_SMART_JUDGE, model_output_field="model_output"),
+        ],
+        True
+    )
     tasks = exper.gen_tasks(
         envs,
-        vllm_runner,
+        workflow,
         "no_tool"
     )
     exper.run_tasks(tasks)
-    #Judge
-    llm_judge = runners.LLMEvaluator(
-        ModelQwen35_32B_AWQ,
-        PROMPT_SMART_JUDGE,
-        vllm_runner,
-        model_output_field="model_output"
-    )
-    tasks_judge = exper.gen_tasks(
-        envs,
-        llm_judge.runner,
-        "no_tool_eval"
-    )
-    exper.run_tasks(tasks_judge)
     
 exp_inference_tool()
 # exp_inference_no_tool()
