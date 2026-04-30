@@ -217,7 +217,7 @@ def inference(args):
                                 link = True
                             else:
                                 link = False
-                            response = search_serper(new_steps[-1]["reasoning"], link=link)
+                            response = search_serper(last_step["reasoning"], link=link)
                             steps[-1]["output"] = response
                         elif tool_name == "Code":
                             cprint.warn("Code tool detected")

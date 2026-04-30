@@ -14,30 +14,30 @@ import os
 # =========================
 # 你主要只需要改这里
 # =========================
-os.environ["CUDA_VISIBLE_DEVICES"] = "0"
+os.environ["CUDA_VISIBLE_DEVICES"] = "0,1,2,3"
 
 API_KEYS = ["local"]
 PROXY_HOST = "127.0.0.1"
 PROXY_PORT = 9000
-REQUEST_TIMEOUT = 600
-WAIT_BACKEND_TIMEOUT = 1800
+REQUEST_TIMEOUT = 6000
+WAIT_BACKEND_TIMEOUT = 18000
 DIR_DATA = "/share/trsdata/trsdata"
 
 BACKENDS = {
     "big": {
-        # "source_model": f"{DIR_DATA}/models/Qwen3.5-27B",
-        # "served_model_name": "qwen-27b",
-        "source_model": f"{DIR_DATA}/models/Qwen2.5-7B-Instruct",
-        "served_model_name": "qwen-7b",
+        "source_model": f"{DIR_DATA}/models/Qwen3-32B-AWQ",
+        "served_model_name": "qwen3-32b",
+        # "source_model": f"{DIR_DATA}/models/Qwen2.5-7B-Instruct",
+        # "served_model_name": "qwen2.5-7b",
         # 对 Qwen3/Qwen3.5 这类支持 thinking 开关的模型，
         # 设为 False 可默认关闭长推理；None 表示不干预模型默认行为。
-        "enable_thinking": False,
+        "enable_thinking": None,
         "host": "127.0.0.1",
         "port": 8001,
         "vllm_args": [
             "--gpu-memory-utilization", "0.95",
             "--max-model-len", "32768",
-            "--max-num-seqs", "16",
+            "--max-num-seqs", "64",
             "--tensor-parallel-size", str(len(os.environ["CUDA_VISIBLE_DEVICES"].split(",")))
         ],
     },

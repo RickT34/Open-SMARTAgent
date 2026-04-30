@@ -27,7 +27,7 @@ AlgoNULL = AlgoEnv("null", {})
 PYTHON = "/share/miniconda3/envs/vllm/bin/python"
 
 
-# @runners.skip_if_output_exists
+@runners.skip_if_output_exists
 @runners.cmd_runner
 def vllm_runner(env: ExpEnv):
     return [

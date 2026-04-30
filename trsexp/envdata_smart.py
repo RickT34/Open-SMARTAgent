@@ -9,7 +9,7 @@ from collections import defaultdict
 TEST_RUN = False
 
 
-@runners.skip_if_output_exists
+
 @runners.cmd_runner
 def runner_inference_tool_prompt(env: exenv.ExpEnv):
     return [
@@ -19,12 +19,12 @@ def runner_inference_tool_prompt(env: exenv.ExpEnv):
             "--max_seq_length", "4096",
             "--save_path", env.get_output_path(),
             "--test_start_id", "0",
-            "--max_test_num",  f"{-1 if not TEST_RUN else 3}",
+            "--max_test_num",  "-1",
             "--method", "mistral" if "mistral" in env.model.name else "llama",
         ]
 
 
-@runners.skip_if_output_exists
+
 @runners.cmd_runner
 def runner_inference_smart(env: exenv.ExpEnv):
     return [
@@ -34,10 +34,10 @@ def runner_inference_smart(env: exenv.ExpEnv):
             "--max_seq_length", "4096",
             "--save_path", env.get_output_path(),
             "--test_start_id", "0",
-            "--max_test_num",  f"{-1 if not TEST_RUN else 3}",
+            "--max_test_num",  "-1",
         ]
 
-@runners.skip_if_output_exists
+
 @runners.cmd_runner
 def runner_inference_eval(env: exenv.ExpEnv):
     return [
@@ -45,6 +45,8 @@ def runner_inference_eval(env: exenv.ExpEnv):
             "--data_path", env.get_output_path(),
             "--save_path", env.get_output_path("smart_judged.json"),
         ]
+
+# runner_inference_eval = runners.skip_if_output_exists(runner_inference_eval, "smart_judged.json")
 
 Datasets_Domain_Tool = []
 Datasets_Domain_Smart = []
@@ -54,8 +56,8 @@ PROMPT_SMART_BASE = "You are an advanced assistant designed to solve tasks auton
 
 for file in os.listdir("data_inference"):
     name = f"Dataset_{file.split('.')[0]}"
-    if "time" in name or "mint" in name:
-        continue
+    # if "time" in name or "mint" in name:
+    #     continue
     if 'intention' in name:
         domain = "intention"
     elif 'math' in name or 'gsm' in name:

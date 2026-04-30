@@ -1,6 +1,7 @@
 import json
 import os
 from vllm import LLM, SamplingParams
+import vllm
 from tqdm import tqdm
 import argparse
 from cprint import *
@@ -10,7 +11,7 @@ from utils_askuser import simulate_user_response
 from utils_code import execute_code
 
 FINAL_RESPONSE_MARKERS = ("### Final Response", "Final Answer:")
-
+vllm.envs.VLLM_HOST_IP="127.0.0.1"
 
 def extract_first_parentheses_content(text):
     start = text.find('(')

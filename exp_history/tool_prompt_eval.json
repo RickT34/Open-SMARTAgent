@@ -4,6 +4,7 @@
             "name": "llama3.1-8b",
             "path": "/share/trsdata/trsdata/models/Llama-3.1-8B-Instruct/",
             "layers": 32,
+            "thinking": null,
             "tags": {},
             "filetype": "hf"
         },
@@ -24,13 +25,14 @@
         "outputs_basedir": "outputs",
         "tags": {},
         "output_dir": "outputs/llama3.1-8b/Dataset_domain_intention_tool_prompt/base_tool/null",
-        "resources_need": 0
+        "resources_need": 1
     },
     {
         "model": {
             "name": "llama3.1-8b",
             "path": "/share/trsdata/trsdata/models/Llama-3.1-8B-Instruct/",
             "layers": 32,
+            "thinking": null,
             "tags": {},
             "filetype": "hf"
         },
@@ -51,13 +53,70 @@
         "outputs_basedir": "outputs",
         "tags": {},
         "output_dir": "outputs/llama3.1-8b/Dataset_domain_math_tool_prompt/base_tool/null",
-        "resources_need": 0
+        "resources_need": 1
     },
     {
         "model": {
             "name": "llama3.1-8b",
             "path": "/share/trsdata/trsdata/models/Llama-3.1-8B-Instruct/",
             "layers": 32,
+            "thinking": null,
+            "tags": {},
+            "filetype": "hf"
+        },
+        "dataset": {
+            "path": "data_inference/domain_time_tool_prompt.json",
+            "tags": {
+                "domain": "time"
+            },
+            "filetype": "json",
+            "name": "Dataset_domain_time_tool_prompt",
+            "prompt_template": "You are an advanced assistant designed to solve tasks autonomously using your knowledge and reasoning. Clearly articulate your thought process and reasoning steps before presenting the final response to ensure transparency and accuracy.\n\n{input}\n\n"
+        },
+        "algo": {
+            "name": "null",
+            "tags": {}
+        },
+        "label": "base_tool",
+        "outputs_basedir": "outputs",
+        "tags": {},
+        "output_dir": "outputs/llama3.1-8b/Dataset_domain_time_tool_prompt/base_tool/null",
+        "resources_need": 1
+    },
+    {
+        "model": {
+            "name": "llama3.1-8b",
+            "path": "/share/trsdata/trsdata/models/Llama-3.1-8B-Instruct/",
+            "layers": 32,
+            "thinking": null,
+            "tags": {},
+            "filetype": "hf"
+        },
+        "dataset": {
+            "path": "data_inference/ood_mint_tool_prompt.json",
+            "tags": {
+                "domain": "time"
+            },
+            "filetype": "json",
+            "name": "Dataset_ood_mint_tool_prompt",
+            "prompt_template": "You are an advanced assistant designed to solve tasks autonomously using your knowledge and reasoning. Clearly articulate your thought process and reasoning steps before presenting the final response to ensure transparency and accuracy.\n\n{input}\n\n"
+        },
+        "algo": {
+            "name": "null",
+            "tags": {}
+        },
+        "label": "base_tool",
+        "outputs_basedir": "outputs",
+        "tags": {},
+        "output_dir": "outputs/llama3.1-8b/Dataset_ood_mint_tool_prompt/base_tool/null",
+        "resources_need": 1
+    },
+    {
+        "model": {
+            "name": "llama3.1-8b",
+            "path": "/share/trsdata/trsdata/models/Llama-3.1-8B-Instruct/",
+            "layers": 32,
+            "thinking": null,
             "tags": {},
             "filetype": "hf"
         },
@@ -78,13 +137,14 @@
         "outputs_basedir": "outputs",
         "tags": {},
         "output_dir": "outputs/llama3.1-8b/Dataset_ood_gsm_tool_prompt/base_tool/null",
-        "resources_need": 0
+        "resources_need": 1
     },
     {
         "model": {
             "name": "mistral-7b",
             "path": "/share/trsdata/trsdata/models/Mistral-7B-Instruct-v0.3",
             "layers": 32,
+            "thinking": null,
             "tags": {},
             "filetype": "hf"
         },
@@ -105,13 +165,14 @@
         "outputs_basedir": "outputs",
         "tags": {},
         "output_dir": "outputs/mistral-7b/Dataset_domain_intention_tool_prompt/base_tool/null",
-        "resources_need": 0
+        "resources_need": 1
     },
     {
         "model": {
             "name": "mistral-7b",
             "path": "/share/trsdata/trsdata/models/Mistral-7B-Instruct-v0.3",
             "layers": 32,
+            "thinking": null,
             "tags": {},
             "filetype": "hf"
         },
@@ -132,13 +193,70 @@
         "outputs_basedir": "outputs",
         "tags": {},
         "output_dir": "outputs/mistral-7b/Dataset_domain_math_tool_prompt/base_tool/null",
-        "resources_need": 0
+        "resources_need": 1
     },
     {
         "model": {
             "name": "mistral-7b",
             "path": "/share/trsdata/trsdata/models/Mistral-7B-Instruct-v0.3",
             "layers": 32,
+            "thinking": null,
+            "tags": {},
+            "filetype": "hf"
+        },
+        "dataset": {
+            "path": "data_inference/domain_time_tool_prompt.json",
+            "tags": {
+                "domain": "time"
+            },
+            "filetype": "json",
+            "name": "Dataset_domain_time_tool_prompt",
+            "prompt_template": "You are an advanced assistant designed to solve tasks autonomously using your knowledge and reasoning. Clearly articulate your thought process and reasoning steps before presenting the final response to ensure transparency and accuracy.\n\n{input}\n\n"
+        },
+        "algo": {
+            "name": "null",
+            "tags": {}
+        },
+        "label": "base_tool",
+        "outputs_basedir": "outputs",
+        "tags": {},
+        "output_dir": "outputs/mistral-7b/Dataset_domain_time_tool_prompt/base_tool/null",
+        "resources_need": 1
+    },
+    {
+        "model": {
+            "name": "mistral-7b",
+            "path": "/share/trsdata/trsdata/models/Mistral-7B-Instruct-v0.3",
+            "layers": 32,
+            "thinking": null,
+            "tags": {},
+            "filetype": "hf"
+        },
+        "dataset": {
+            "path": "data_inference/ood_mint_tool_prompt.json",
+            "tags": {
+                "domain": "time"
+            },
+            "filetype": "json",
+            "name": "Dataset_ood_mint_tool_prompt",
+            "prompt_template": "You are an advanced assistant designed to solve tasks autonomously using your knowledge and reasoning. Clearly articulate your thought process and reasoning steps before presenting the final response to ensure transparency and accuracy.\n\n{input}\n\n"
+        },
+        "algo": {
+            "name": "null",
+            "tags": {}
+        },
+        "label": "base_tool",
+        "outputs_basedir": "outputs",
+        "tags": {},
+        "output_dir": "outputs/mistral-7b/Dataset_ood_mint_tool_prompt/base_tool/null",
+        "resources_need": 1
+    },
+    {
+        "model": {
+            "name": "mistral-7b",
+            "path": "/share/trsdata/trsdata/models/Mistral-7B-Instruct-v0.3",
+            "layers": 32,
+            "thinking": null,
             "tags": {},
             "filetype": "hf"
         },
@@ -159,13 +277,14 @@
         "outputs_basedir": "outputs",
         "tags": {},
         "output_dir": "outputs/mistral-7b/Dataset_ood_gsm_tool_prompt/base_tool/null",
-        "resources_need": 0
+        "resources_need": 1
     },
     {
         "model": {
             "name": "llama3.1-8b-smartagent",
             "path": "/share/trsdata/trsdata/models/SMART/SMARTAgent-Llama-3.1-8B/",
             "layers": 32,
+            "thinking": null,
             "tags": {},
             "filetype": "hf"
         },
@@ -186,13 +305,14 @@
         "outputs_basedir": "outputs",
         "tags": {},
         "output_dir": "outputs/llama3.1-8b-smartagent/Dataset_domain_intention_tool_prompt/base_tool/null",
-        "resources_need": 0
+        "resources_need": 1
     },
     {
         "model": {
             "name": "llama3.1-8b-smartagent",
             "path": "/share/trsdata/trsdata/models/SMART/SMARTAgent-Llama-3.1-8B/",
             "layers": 32,
+            "thinking": null,
             "tags": {},
             "filetype": "hf"
         },
@@ -213,13 +333,70 @@
         "outputs_basedir": "outputs",
         "tags": {},
         "output_dir": "outputs/llama3.1-8b-smartagent/Dataset_domain_math_tool_prompt/base_tool/null",
-        "resources_need": 0
+        "resources_need": 1
     },
     {
         "model": {
             "name": "llama3.1-8b-smartagent",
             "path": "/share/trsdata/trsdata/models/SMART/SMARTAgent-Llama-3.1-8B/",
             "layers": 32,
+            "thinking": null,
+            "tags": {},
+            "filetype": "hf"
+        },
+        "dataset": {
+            "path": "data_inference/domain_time_tool_prompt.json",
+            "tags": {
+                "domain": "time"
+            },
+            "filetype": "json",
+            "name": "Dataset_domain_time_tool_prompt",
+            "prompt_template": "You are an advanced assistant designed to solve tasks autonomously using your knowledge and reasoning. Clearly articulate your thought process and reasoning steps before presenting the final response to ensure transparency and accuracy.\n\n{input}\n\n"
+        },
+        "algo": {
+            "name": "null",
+            "tags": {}
+        },
+        "label": "base_tool",
+        "outputs_basedir": "outputs",
+        "tags": {},
+        "output_dir": "outputs/llama3.1-8b-smartagent/Dataset_domain_time_tool_prompt/base_tool/null",
+        "resources_need": 1
+    },
+    {
+        "model": {
+            "name": "llama3.1-8b-smartagent",
+            "path": "/share/trsdata/trsdata/models/SMART/SMARTAgent-Llama-3.1-8B/",
+            "layers": 32,
+            "thinking": null,
+            "tags": {},
+            "filetype": "hf"
+        },
+        "dataset": {
+            "path": "data_inference/ood_mint_tool_prompt.json",
+            "tags": {
+                "domain": "time"
+            },
+            "filetype": "json",
+            "name": "Dataset_ood_mint_tool_prompt",
+            "prompt_template": "You are an advanced assistant designed to solve tasks autonomously using your knowledge and reasoning. Clearly articulate your thought process and reasoning steps before presenting the final response to ensure transparency and accuracy.\n\n{input}\n\n"
+        },
+        "algo": {
+            "name": "null",
+            "tags": {}
+        },
+        "label": "base_tool",
+        "outputs_basedir": "outputs",
+        "tags": {},
+        "output_dir": "outputs/llama3.1-8b-smartagent/Dataset_ood_mint_tool_prompt/base_tool/null",
+        "resources_need": 1
+    },
+    {
+        "model": {
+            "name": "llama3.1-8b-smartagent",
+            "path": "/share/trsdata/trsdata/models/SMART/SMARTAgent-Llama-3.1-8B/",
+            "layers": 32,
+            "thinking": null,
             "tags": {},
             "filetype": "hf"
         },
@@ -240,13 +417,14 @@
         "outputs_basedir": "outputs",
         "tags": {},
         "output_dir": "outputs/llama3.1-8b-smartagent/Dataset_ood_gsm_tool_prompt/base_tool/null",
-        "resources_need": 0
+        "resources_need": 1
     },
     {
         "model": {
             "name": "mistral-7b-smartagent",
             "path": "/share/trsdata/trsdata/models/SMART/SMARTAgent-Mistral-7B-Instruct-v0.3",
             "layers": 32,
+            "thinking": null,
             "tags": {},
             "filetype": "hf"
         },
@@ -267,13 +445,14 @@
         "outputs_basedir": "outputs",
         "tags": {},
         "output_dir": "outputs/mistral-7b-smartagent/Dataset_domain_intention_tool_prompt/base_tool/null",
-        "resources_need": 0
+        "resources_need": 1
     },
     {
         "model": {
             "name": "mistral-7b-smartagent",
             "path": "/share/trsdata/trsdata/models/SMART/SMARTAgent-Mistral-7B-Instruct-v0.3",
             "layers": 32,
+            "thinking": null,
             "tags": {},
             "filetype": "hf"
         },
@@ -294,13 +473,70 @@
         "outputs_basedir": "outputs",
         "tags": {},
         "output_dir": "outputs/mistral-7b-smartagent/Dataset_domain_math_tool_prompt/base_tool/null",
-        "resources_need": 0
+        "resources_need": 1
     },
     {
         "model": {
             "name": "mistral-7b-smartagent",
             "path": "/share/trsdata/trsdata/models/SMART/SMARTAgent-Mistral-7B-Instruct-v0.3",
             "layers": 32,
+            "thinking": null,
+            "tags": {},
+            "filetype": "hf"
+        },
+        "dataset": {
+            "path": "data_inference/domain_time_tool_prompt.json",
+            "tags": {
+                "domain": "time"
+            },
+            "filetype": "json",
+            "name": "Dataset_domain_time_tool_prompt",
+            "prompt_template": "You are an advanced assistant designed to solve tasks autonomously using your knowledge and reasoning. Clearly articulate your thought process and reasoning steps before presenting the final response to ensure transparency and accuracy.\n\n{input}\n\n"
+        },
+        "algo": {
+            "name": "null",
+            "tags": {}
+        },
+        "label": "base_tool",
+        "outputs_basedir": "outputs",
+        "tags": {},
+        "output_dir": "outputs/mistral-7b-smartagent/Dataset_domain_time_tool_prompt/base_tool/null",
+        "resources_need": 1
+    },
+    {
+        "model": {
+            "name": "mistral-7b-smartagent",
+            "path": "/share/trsdata/trsdata/models/SMART/SMARTAgent-Mistral-7B-Instruct-v0.3",
+            "layers": 32,
+            "thinking": null,
+            "tags": {},
+            "filetype": "hf"
+        },
+        "dataset": {
+            "path": "data_inference/ood_mint_tool_prompt.json",
+            "tags": {
+                "domain": "time"
+            },
+            "filetype": "json",
+            "name": "Dataset_ood_mint_tool_prompt",
+            "prompt_template": "You are an advanced assistant designed to solve tasks autonomously using your knowledge and reasoning. Clearly articulate your thought process and reasoning steps before presenting the final response to ensure transparency and accuracy.\n\n{input}\n\n"
+        },
+        "algo": {
+            "name": "null",
+            "tags": {}
+        },
+        "label": "base_tool",
+        "outputs_basedir": "outputs",
+        "tags": {},
+        "output_dir": "outputs/mistral-7b-smartagent/Dataset_ood_mint_tool_prompt/base_tool/null",
+        "resources_need": 1
+    },
+    {
+        "model": {
+            "name": "mistral-7b-smartagent",
+            "path": "/share/trsdata/trsdata/models/SMART/SMARTAgent-Mistral-7B-Instruct-v0.3",
+            "layers": 32,
+            "thinking": null,
             "tags": {},
             "filetype": "hf"
         },
@@ -321,6 +557,286 @@
         "outputs_basedir": "outputs",
         "tags": {},
         "output_dir": "outputs/mistral-7b-smartagent/Dataset_ood_gsm_tool_prompt/base_tool/null",
-        "resources_need": 0
+        "resources_need": 1
+    },
+    {
+        "model": {
+            "name": "llama3.1-8b-smartagent",
+            "path": "/share/trsdata/trsdata/models/SMART/SMARTAgent-Llama-3.1-8B/",
+            "layers": 32,
+            "thinking": null,
+            "tags": {},
+            "filetype": "hf"
+        },
+        "dataset": {
+            "path": "data_inference/domain_intention_smart.json",
+            "tags": {
+                "domain": "intention"
+            },
+            "filetype": "json",
+            "name": "Dataset_domain_intention_smart",
+            "prompt_template": "You are an advanced assistant designed to solve tasks autonomously using your knowledge and reasoning. Clearly articulate your thought process and reasoning steps before presenting the final response to ensure transparency and accuracy.\n\n{input}\n\n"
+        },
+        "algo": {
+            "name": "null",
+            "tags": {}
+        },
+        "label": "smart_tool",
+        "outputs_basedir": "outputs",
+        "tags": {},
+        "output_dir": "outputs/llama3.1-8b-smartagent/Dataset_domain_intention_smart/smart_tool/null",
+        "resources_need": 1
+    },
+    {
+        "model": {
+            "name": "llama3.1-8b-smartagent",
+            "path": "/share/trsdata/trsdata/models/SMART/SMARTAgent-Llama-3.1-8B/",
+            "layers": 32,
+            "thinking": null,
+            "tags": {},
+            "filetype": "hf"
+        },
+        "dataset": {
+            "path": "data_inference/domain_math_smart.json",
+            "tags": {
+                "domain": "math"
+            },
+            "filetype": "json",
+            "name": "Dataset_domain_math_smart",
+            "prompt_template": "You are an advanced assistant designed to solve tasks autonomously using your knowledge and reasoning. Clearly articulate your thought process and reasoning steps before presenting the final response to ensure transparency and accuracy.\n\n{input}\n\n"
+        },
+        "algo": {
+            "name": "null",
+            "tags": {}
+        },
+        "label": "smart_tool",
+        "outputs_basedir": "outputs",
+        "tags": {},
+        "output_dir": "outputs/llama3.1-8b-smartagent/Dataset_domain_math_smart/smart_tool/null",
+        "resources_need": 1
+    },
+    {
+        "model": {
+            "name": "llama3.1-8b-smartagent",
+            "path": "/share/trsdata/trsdata/models/SMART/SMARTAgent-Llama-3.1-8B/",
+            "layers": 32,
+            "thinking": null,
+            "tags": {},
+            "filetype": "hf"
+        },
+        "dataset": {
+            "path": "data_inference/domain_time_smart.json",
+            "tags": {
+                "domain": "time"
+            },
+            "filetype": "json",
+            "name": "Dataset_domain_time_smart",
+            "prompt_template": "You are an advanced assistant designed to solve tasks autonomously using your knowledge and reasoning. Clearly articulate your thought process and reasoning steps before presenting the final response to ensure transparency and accuracy.\n\n{input}\n\n"
+        },
+        "algo": {
+            "name": "null",
+            "tags": {}
+        },
+        "label": "smart_tool",
+        "outputs_basedir": "outputs",
+        "tags": {},
+        "output_dir": "outputs/llama3.1-8b-smartagent/Dataset_domain_time_smart/smart_tool/null",
+        "resources_need": 1
+    },
+    {
+        "model": {
+            "name": "llama3.1-8b-smartagent",
+            "path": "/share/trsdata/trsdata/models/SMART/SMARTAgent-Llama-3.1-8B/",
+            "layers": 32,
+            "thinking": null,
+            "tags": {},
+            "filetype": "hf"
+        },
+        "dataset": {
+            "path": "data_inference/ood_mint_smart.json",
+            "tags": {
+                "domain": "time"
+            },
+            "filetype": "json",
+            "name": "Dataset_ood_mint_smart",
+            "prompt_template": "You are an advanced assistant designed to solve tasks autonomously using your knowledge and reasoning. Clearly articulate your thought process and reasoning steps before presenting the final response to ensure transparency and accuracy.\n\n{input}\n\n"
+        },
+        "algo": {
+            "name": "null",
+            "tags": {}
+        },
+        "label": "smart_tool",
+        "outputs_basedir": "outputs",
+        "tags": {},
+        "output_dir": "outputs/llama3.1-8b-smartagent/Dataset_ood_mint_smart/smart_tool/null",
+        "resources_need": 1
+    },
+    {
+        "model": {
+            "name": "llama3.1-8b-smartagent",
+            "path": "/share/trsdata/trsdata/models/SMART/SMARTAgent-Llama-3.1-8B/",
+            "layers": 32,
+            "thinking": null,
+            "tags": {},
+            "filetype": "hf"
+        },
+        "dataset": {
+            "path": "data_inference/ood_gsm_smart.json",
+            "tags": {
+                "domain": "math"
+            },
+            "filetype": "json",
+            "name": "Dataset_ood_gsm_smart",
+            "prompt_template": "You are an advanced assistant designed to solve tasks autonomously using your knowledge and reasoning. Clearly articulate your thought process and reasoning steps before presenting the final response to ensure transparency and accuracy.\n\n{input}\n\n"
+        },
+        "algo": {
+            "name": "null",
+            "tags": {}
+        },
+        "label": "smart_tool",
+        "outputs_basedir": "outputs",
+        "tags": {},
+        "output_dir": "outputs/llama3.1-8b-smartagent/Dataset_ood_gsm_smart/smart_tool/null",
+        "resources_need": 1
+    },
+    {
+        "model": {
+            "name": "mistral-7b-smartagent",
+            "path": "/share/trsdata/trsdata/models/SMART/SMARTAgent-Mistral-7B-Instruct-v0.3",
+            "layers": 32,
+            "thinking": null,
+            "tags": {},
+            "filetype": "hf"
+        },
+        "dataset": {
+            "path": "data_inference/domain_intention_smart.json",
+            "tags": {
+                "domain": "intention"
+            },
+            "filetype": "json",
+            "name": "Dataset_domain_intention_smart",
+            "prompt_template": "You are an advanced assistant designed to solve tasks autonomously using your knowledge and reasoning. Clearly articulate your thought process and reasoning steps before presenting the final response to ensure transparency and accuracy.\n\n{input}\n\n"
+        },
+        "algo": {
+            "name": "null",
+            "tags": {}
+        },
+        "label": "smart_tool",
+        "outputs_basedir": "outputs",
+        "tags": {},
+        "output_dir": "outputs/mistral-7b-smartagent/Dataset_domain_intention_smart/smart_tool/null",
+        "resources_need": 1
+    },
+    {
+        "model": {
+            "name": "mistral-7b-smartagent",
+            "path": "/share/trsdata/trsdata/models/SMART/SMARTAgent-Mistral-7B-Instruct-v0.3",
+            "layers": 32,
+            "thinking": null,
+            "tags": {},
+            "filetype": "hf"
+        },
+        "dataset": {
+            "path": "data_inference/domain_math_smart.json",
+            "tags": {
+                "domain": "math"
+            },
+            "filetype": "json",
+            "name": "Dataset_domain_math_smart",
+            "prompt_template": "You are an advanced assistant designed to solve tasks autonomously using your knowledge and reasoning. Clearly articulate your thought process and reasoning steps before presenting the final response to ensure transparency and accuracy.\n\n{input}\n\n"
+        },
+        "algo": {
+            "name": "null",
+            "tags": {}
+        },
+        "label": "smart_tool",
+        "outputs_basedir": "outputs",
+        "tags": {},
+        "output_dir": "outputs/mistral-7b-smartagent/Dataset_domain_math_smart/smart_tool/null",
+        "resources_need": 1
+    },
+    {
+        "model": {
+            "name": "mistral-7b-smartagent",
+            "path": "/share/trsdata/trsdata/models/SMART/SMARTAgent-Mistral-7B-Instruct-v0.3",
+            "layers": 32,
+            "thinking": null,
+            "tags": {},
+            "filetype": "hf"
+        },
+        "dataset": {
+            "path": "data_inference/domain_time_smart.json",
+            "tags": {
+                "domain": "time"
+            },
+            "filetype": "json",
+            "name": "Dataset_domain_time_smart",
+            "prompt_template": "You are an advanced assistant designed to solve tasks autonomously using your knowledge and reasoning. Clearly articulate your thought process and reasoning steps before presenting the final response to ensure transparency and accuracy.\n\n{input}\n\n"
+        },
+        "algo": {
+            "name": "null",
+            "tags": {}
+        },
+        "label": "smart_tool",
+        "outputs_basedir": "outputs",
+        "tags": {},
+        "output_dir": "outputs/mistral-7b-smartagent/Dataset_domain_time_smart/smart_tool/null",
+        "resources_need": 1
+    },
+    {
+        "model": {
+            "name": "mistral-7b-smartagent",
+            "path": "/share/trsdata/trsdata/models/SMART/SMARTAgent-Mistral-7B-Instruct-v0.3",
+            "layers": 32,
+            "thinking": null,
+            "tags": {},
+            "filetype": "hf"
+        },
+        "dataset": {
+            "path": "data_inference/ood_mint_smart.json",
+            "tags": {
+                "domain": "time"
+            },
+            "filetype": "json",
+            "name": "Dataset_ood_mint_smart",
+            "prompt_template": "You are an advanced assistant designed to solve tasks autonomously using your knowledge and reasoning. Clearly articulate your thought process and reasoning steps before presenting the final response to ensure transparency and accuracy.\n\n{input}\n\n"
+        },
+        "algo": {
+            "name": "null",
+            "tags": {}
+        },
+        "label": "smart_tool",
+        "outputs_basedir": "outputs",
+        "tags": {},
+        "output_dir": "outputs/mistral-7b-smartagent/Dataset_ood_mint_smart/smart_tool/null",
+        "resources_need": 1
+    },
+    {
+        "model": {
+            "name": "mistral-7b-smartagent",
+            "path": "/share/trsdata/trsdata/models/SMART/SMARTAgent-Mistral-7B-Instruct-v0.3",
+            "layers": 32,
+            "thinking": null,
+            "tags": {},
+            "filetype": "hf"
+        },
+        "dataset": {
+            "path": "data_inference/ood_gsm_smart.json",
+            "tags": {
+                "domain": "math"
+            },
+            "filetype": "json",
+            "name": "Dataset_ood_gsm_smart",
+            "prompt_template": "You are an advanced assistant designed to solve tasks autonomously using your knowledge and reasoning. Clearly articulate your thought process and reasoning steps before presenting the final response to ensure transparency and accuracy.\n\n{input}\n\n"
+        },
+        "algo": {
+            "name": "null",
+            "tags": {}
+        },
+        "label": "smart_tool",
+        "outputs_basedir": "outputs",
+        "tags": {},
+        "output_dir": "outputs/mistral-7b-smartagent/Dataset_ood_gsm_smart/smart_tool/null",
+        "resources_need": 1
     }
 ]

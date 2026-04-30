@@ -4,7 +4,7 @@ import time
 
 api_key = json.load(open("./secret.json"))["serper_key"]
 
-conn = http.client.HTTPSConnection("127.0.0.1:8765")
+conn = http.client.HTTPConnection("127.0.0.1", 8765)
 headers = {
   'X-API-KEY': api_key,
   'Content-Type': 'application/json'
@@ -66,3 +66,5 @@ def search_serper(query, link=False, num=10):
         print(error)
         return error
 
+# if __name__ == "__main__":
+#     print(search_serper("Who is TR", link=True, num=3))
