@@ -60,12 +60,13 @@ def exp_inference_no_tool():
         ],
         True
     )
+    workflow.info()
     tasks = exper.gen_tasks(
         envs,
         workflow,
         "no_tool"
     )
-    exper.run_tasks(tasks)
+    # exper.run_tasks(tasks)
     
-exp_inference_tool()
-# exp_inference_no_tool()
+# exp_inference_tool()
+exp_inference_no_tool()
