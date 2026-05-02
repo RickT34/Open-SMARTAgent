@@ -98,7 +98,8 @@ def summery():
     with open("outptus/summery.md", "w") as f:
         t.to_markdown(f)
     
+move_envs(envs_smart, "outputs", "outputs.smart.bak")
 # exp_inference_tool(False)
 # exp_inference_tool(True)
 # exp_inference_no_tool()
-summery()
+# summery()

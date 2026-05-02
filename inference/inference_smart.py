@@ -221,7 +221,7 @@ def inference(args):
                             steps[-1]["output"] = response
                         elif tool_name == "Code":
                             cprint.warn("Code tool detected")
-                            response = execute_code(last_step["reasoning"], file_name=f"/home/acikgoz2/SmartAgent/eval/tmp/{str(example_count)}_{example_word}.py")
+                            response = execute_code(last_step["reasoning"], file_name=f"./env/{str(example_count)}_{example_word}.py")
                             steps[-1]["output"] = response
                         else:
                             assert False, "Unknown tool name"

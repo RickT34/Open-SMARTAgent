@@ -157,7 +157,7 @@ class SmartJudgeFormater(runners.Runner):
             task = t['task']
             res = {}
             if 'judge' in t:
-                res["Acc"] = 1 if t['judge'] =="correct" else 0
+                res["Acc"] = 1 if "correct" in t['judge'].lower() else 0
             else: #For intention
                 acc = defaultdict(list)
                 for m in t['missing_results']:
