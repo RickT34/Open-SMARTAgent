@@ -105,9 +105,9 @@ def main(data, answered_data, hash_tab, save_path, log, model):
         print("\n======================= Response ========================\n")
         print(response)
         
-        if response == "correct":
+        if "correct" in response.lower():
             judgment["correct"] += 1
-        elif response == "wrong":
+        elif "wrong" in response.lower():
             judgment["wrong"] += 1  
         else:
             assert False, "Unknown judgment: " + response

@@ -1,10 +1,14 @@
-from lazyexp import exenv, exper
+from pathlib import Path
+from lazyexp import exenv, exper, runners
 from subprocess import Popen
 import os
 from lazyexp.exenv import *
 import typing
+
+from lazyexp.exenv import ExpEnv, Path
 from envdata import *
 from collections import defaultdict
+import json
 
 TEST_RUN = False
 
@@ -81,8 +85,8 @@ PROMPT_SMART_BASE = "You are an advanced assistant designed to solve tasks auton
 
 for file in os.listdir("data_inference"):
     name = f"Dataset_{file.split('.')[0]}"
-    # if "time" in name or "mint" in name:
-    #     continue
+    if "time" in name or "mint" in name:
+        continue
     if "intention" in name:
         domain = "intention"
     elif "math" in name or "gsm" in name:
@@ -137,6 +141,39 @@ PROMPT_SMART_JUDGE = """You are a helpful assistant to jusge whether the model's
 
 def line_check_judge(model_output, sample):
     last_line = model_output.strip().split("\n")[-1].strip()
+    res = {}
     if last_line in ["Correct", "Wrong"]:
-        return last_line.lower()
-    return "unclear"
+        res["Acc"] = 1 if last_line=="Correct" else 0
+    return res
+
+class SmartJudgeFormater(runners.Runner):
+    def __init__(self):
+        super().__init__("smart_judge_formater", [Path("smart_judged.json")], [Path("smart_judge_formatted.json")])
+        
+    def run(self, exp_env: ExpEnv):
+        outputs = json.load(exp_env.get_output_path(self.required_paths[0]).open("r"))
+        task_results = {}
+        for t in outputs:
+            task = t['task']
+            res = {}
+            if 'judge' in t:
+                res["Acc"] = 1 if t['judge'] =="correct" else 0
+            else: #For intention
+                acc = defaultdict(list)
+                for m in t['missing_results']:
+                    imp = int(m['importance'])
+                    acc[imp].append(1 if m['judgment']=="Yes" else 0)
+                res["Intention Coverage"] = sum(sum(i) for i in acc.values())/sum(len(i) for i in acc.values())
+            res["Tool Call"] = len([p for p in t['predict'] if p['type']=="tool"])
+            task_results[task]=res
+        l = []
+        dataset = runners.get_dataset_cached(exp_env.dataset)
+        for sample in dataset:
+            t = sample["input"].split("### Task")[1].split("###")[0].strip()
+            if t in task_results:
+                l.append(task_results[t])
+            else:
+                l.append(None)
+        json.dump(l, exp_env.get_output_path(self.output_paths[0]).open("w"))
+            
+        

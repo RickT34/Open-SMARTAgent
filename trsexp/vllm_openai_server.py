@@ -22,6 +22,7 @@ PROXY_PORT = 9000
 REQUEST_TIMEOUT = 6000
 WAIT_BACKEND_TIMEOUT = 18000
 DIR_DATA = "/share/trsdata/trsdata"
+THINKING = True
 
 BACKENDS = {
     "big": {
@@ -31,7 +32,7 @@ BACKENDS = {
         # "served_model_name": "qwen2.5-7b",
         # 对 Qwen3/Qwen3.5 这类支持 thinking 开关的模型，
         # 设为 False 可默认关闭长推理；None 表示不干预模型默认行为。
-        "enable_thinking": None,
+        "enable_thinking": THINKING,
         "host": "127.0.0.1",
         "port": 8001,
         "vllm_args": [
@@ -47,12 +48,12 @@ MODEL_ALIASES = {
     "gpt-4o": {
         "backend": "big",
         # 别名级开关优先级高于 backend 默认值。
-        "enable_thinking": None,
+        "enable_thinking": THINKING,
         "extra_body": {},
     },
     "gpt-4o-mini": {
         "backend": "big",
-        "enable_thinking": None,
+        "enable_thinking": THINKING,
         "extra_body": {},
     },
 }
