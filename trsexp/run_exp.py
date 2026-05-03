@@ -53,6 +53,7 @@ def exp_inference_tool(judge:bool=True):
                 runners.SummeryTable("smart_judge_formatted.json")
             ],
             skip_success=False,
+            skip_exclude_paths=["smart_judge_formatted.json", "summery.json"],
             promised_paths=["result.json"]
         )
         workflow.info()
@@ -97,8 +98,9 @@ def summery():
     print(t)
     with open("outputs/summery.md", "w") as f:
         t.to_markdown(f)
+    t.to_csv("outputs/summery.csv")
     
-# exp_inference_tool(False)
+exp_inference_tool(False)
 # exp_inference_tool(True)
 # exp_inference_no_tool()
-summery()
+# summery()
