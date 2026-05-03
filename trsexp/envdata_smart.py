@@ -164,6 +164,8 @@ class SmartJudgeFormater(runners.Runner):
                     imp = int(m['importance'])
                     acc[imp].append(1 if m['judgment']=="Yes" else 0)
                 res["Intention Coverage"] = sum(sum(i) for i in acc.values())/sum(len(i) for i in acc.values())
+                for i, l in acc.items():
+                    res[f"Intention Coverage Lv.{i}"] = sum(l)/len(l)
             res["Tool Call"] = len([p for p in t['predict'] if p['type']=="tool"])
             task_results[task]=res
         l = []

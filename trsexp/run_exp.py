@@ -95,11 +95,10 @@ def exp_inference_no_tool():
 def summery():
     t = get_summery_table(envs_base+envs_smart+envs_no_tool)
     print(t)
-    with open("outptus/summery.md", "w") as f:
+    with open("outputs/summery.md", "w") as f:
         t.to_markdown(f)
     
-move_envs(envs_smart, "outputs", "outputs.smart.bak")
 # exp_inference_tool(False)
 # exp_inference_tool(True)
 # exp_inference_no_tool()
-# summery()
+summery()
