@@ -14,7 +14,7 @@ import os
 # =========================
 # 你主要只需要改这里
 # =========================
-os.environ["CUDA_VISIBLE_DEVICES"] = "0,1,2,3"
+os.environ["CUDA_VISIBLE_DEVICES"] = "0"
 
 API_KEYS = ["local"]
 PROXY_HOST = "127.0.0.1"
@@ -22,7 +22,7 @@ PROXY_PORT = 9000
 REQUEST_TIMEOUT = 6000
 WAIT_BACKEND_TIMEOUT = 18000
 DIR_DATA = "/share/trsdata/trsdata"
-THINKING = True
+THINKING = False
 
 BACKENDS = {
     "big": {
