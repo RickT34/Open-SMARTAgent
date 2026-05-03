@@ -9,24 +9,61 @@ def get_summery_table(envs:list[ExpEnv]):
         assert len(envs) == 1
         return json.load(envs[0].get_output_path("summery.json").open())
     return datapro.extable(envs, (datapro.ExpAxis.ModelAxis, datapro.ExpAxis.DatasetAxis, datapro.ExpAxis.LabelAxis), process_fc)
-envs_base = exenv.genEnvs(
+envs_base:list[ExpEnv] = exenv.genEnvs(
         MODELS_BASE + MODELS_SMART, 
         Datasets_Domain_Tool+Datasets_OOD_Tool,
         [AlgoNULL],
         "base_tool"
     )
-envs_smart = exenv.genEnvs(
+envs_smart:list[ExpEnv] = exenv.genEnvs(
         MODELS_SMART, 
         Datasets_Domain_Smart+Datasets_OOD_Smart,
         [AlgoNULL],
         "smart_tool"
     )
-envs_no_tool= exenv.genEnvs(
+envs_no_tool:list[ExpEnv] = exenv.genEnvs(
         MODELS_BASE + MODELS_SMART, 
         Datasets_Domain_Tool+Datasets_OOD_Tool,
         [AlgoNULL],
         "base_no_tool"
     )
+
+import pandas as pd
+
+def cross_ansly():
+    assert len(envs_no_tool) == len(envs_base)
+    res = {}
+    for env_notool, env_tool in zip(envs_no_tool, envs_base):
+        assert env_notool.model.name == env_tool.model.name
+        model = env_notool.model.name
+        assert env_notool.dataset.name == env_tool.dataset.name
+        dataset = env_notool.dataset.name
+        if env_notool.dataset.tags["domain"] == "intention":
+            continue
+        res_notool = json.load(
+            env_notool.get_output_path("llmeval/result_cleared.json").open()
+        )
+        res_tool = json.load(env_tool.get_output_path("smart_judge_formatted.json").open())
+        assert len(res_notool) == len(res_tool), f"{len(res_notool)} != {len(res_tool)} in {env_notool.model.name}-{env_notool.dataset.name}"
+        assert (model, dataset) not in res
+        d = defaultdict(float)
+        for r_notool, r_tool in zip(res_notool, res_tool):
+            if r_notool is None or len(r_notool) == 0 or r_tool is None:
+                continue
+            try:
+                if r_tool["Tool Call"] == 0:
+                    continue
+                d[(f"notool_{r_notool['Acc']}", f"tool_{r_tool['Acc']}")] += 1/len(res_notool)
+            except Exception as e:
+                print(f"Error in {model}-{dataset}: {e}")
+                print(r_notool)
+                print(r_tool)
+                continue
+        res[(model, dataset)] = d
+    t = pd.DataFrame(res)
+    print(t)
+    t.to_csv("outputs/cross_ansly.csv")
+        
 
 def exp_inference_tool(judge:bool=True):
     if not judge:
@@ -99,8 +136,9 @@ def summery():
     with open("outputs/summery.md", "w") as f:
         t.to_markdown(f)
     t.to_csv("outputs/summery.csv")
-    
-exp_inference_tool(False)
+
+# exp_inference_tool(False)
 # exp_inference_tool(True)
 # exp_inference_no_tool()
-# summery()
+summery()
+# cross_ansly()

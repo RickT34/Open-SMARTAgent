@@ -144,7 +144,8 @@ def line_check_judge(model_output, sample):
     res = {}
     if last_line in ["Correct", "Wrong"]:
         res["Acc"] = 1 if last_line=="Correct" else 0
-    return res
+        return res
+    return None
 
 class SmartJudgeFormater(runners.Runner):
     def __init__(self):
@@ -156,6 +157,7 @@ class SmartJudgeFormater(runners.Runner):
         for t in outputs:
             task = t['task']
             res = {}
+            res["Tool Call"] = len([p for p in t['predict'] if p['type']=="tool"])
             if 'judge' in t:
                 judgement = t['judge'].strip().split("\n")[-1].strip()
                 if "wrong" in judgement.lower() or "incorrect" in judgement.lower():
@@ -185,7 +187,6 @@ class SmartJudgeFormater(runners.Runner):
                 ]
                 if summary_hits:
                     res["Summarized Intention Coverage"] = sum(summary_hits) / len(summary_hits)
-            res["Tool Call"] = len([p for p in t['predict'] if p['type']=="tool"])
             task_results[task]=res
         l = []
         dataset = runners.get_dataset_cached(exp_env.dataset)
