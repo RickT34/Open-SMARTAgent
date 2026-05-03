@@ -6,48 +6,21 @@ import json
 import re
 import sys
 import threading
-from dataclasses import dataclass, asdict
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 from pathlib import Path
 from typing import Any
-from urllib import error, request
-
-
-SEARCH_PATTERNS = [
-    re.compile(r"\(tool: Search\)\n([^\n]+)"),
-    re.compile(r"\[\[Search\]\][^\n]*\n([^\n]+)"),
-    re.compile(r"Search\((.+?)\)"),
-]
-FINAL_PATTERNS = [
-    re.compile(r"### Final Response\s*\n([\s\S]*?)\s*$"),
-    re.compile(r"Final Answer:\s*([\s\S]*?)\s*$"),
-]
-
-
-@dataclass
-class QueryEntry:
-    query: str
-    task: str
-    final_answer: str
-    gold_reasoning: str
-    source_file: str
-
-
-@dataclass
-class OrganicItem:
-    title: str
-    link: str
-    date: str
-    snippet: str
+from urllib import error, parse, request
 
 
 def parse_args() -> argparse.Namespace:
-    parser = argparse.ArgumentParser(description="Local Serper-compatible sidecar for SMART TIME.")
+    parser = argparse.ArgumentParser(
+        description="Local Serper-compatible sidecar backed by an OpenAI-compatible model."
+    )
     parser.add_argument(
         "--dataset",
         action="append",
-        required=True,
-        help="Dataset JSON used to build a query index. Can be passed multiple times.",
+        default=[],
+        help="Optional legacy argument kept for compatibility. It is ignored in query-only mode.",
     )
     parser.add_argument(
         "--host",
@@ -72,38 +45,22 @@ def parse_args() -> argparse.Namespace:
     )
     parser.add_argument(
         "--cache-file",
-        default="serper_sidecar/cache/generated_search_results.json",
+        default="cache/generated_search_results.json",
         help="Where generated search responses are cached.",
     )
     parser.add_argument(
         "--top-k",
         type=int,
         default=5,
-        help="How many organic results to generate per query.",
+        help="Preferred number of organic results to generate.",
+    )
+    parser.add_argument(
+        "--max-retries",
+        type=int,
+        default=3,
+        help="How many times to retry when the model does not return valid JSON.",
     )
     return parser.parse_args()
-
-
-def extract_task(text: str) -> str:
-    if "### Task" not in text:
-        return text.strip()
-    return text.split("### Task", 1)[1].split("###", 1)[0].strip()
-
-
-def extract_query(text: str) -> str | None:
-    for pattern in SEARCH_PATTERNS:
-        matched = pattern.search(text)
-        if matched:
-            return matched.group(1).strip()
-    return None
-
-
-def extract_final_answer(text: str) -> str:
-    for pattern in FINAL_PATTERNS:
-        matched = pattern.search(text)
-        if matched:
-            return matched.group(1).strip()
-    return ""
 
 
 def load_secret(secret_file: str) -> tuple[str, str]:
@@ -116,29 +73,6 @@ def load_secret(secret_file: str) -> tuple[str, str]:
     return api_key, base_url.rstrip("/")
 
 
-def load_query_index(dataset_files: list[str]) -> dict[str, QueryEntry]:
-    index: dict[str, QueryEntry] = {}
-    for dataset_file in dataset_files:
-        with open(dataset_file, "r", encoding="utf-8") as f:
-            data = json.load(f)
-        for item in data:
-            input_text = item.get("input", "")
-            output_text = item.get("output", "")
-            task = extract_task(input_text)
-            query = extract_query(output_text) or extract_query(input_text)
-            if not query:
-                continue
-            entry = QueryEntry(
-                query=query,
-                task=task,
-                final_answer=extract_final_answer(output_text),
-                gold_reasoning=output_text.strip(),
-                source_file=dataset_file,
-            )
-            index[query] = entry
-    return index
-
-
 class LLMBackedSearchGenerator:
     def __init__(
         self,
@@ -147,14 +81,14 @@ class LLMBackedSearchGenerator:
         model: str,
         cache_file: str,
         top_k: int,
-        query_index: dict[str, QueryEntry],
+        max_retries: int,
     ) -> None:
         self.api_key = api_key
         self.base_url = base_url
         self.model = model
         self.cache_file = Path(cache_file)
         self.top_k = top_k
-        self.query_index = query_index
+        self.max_retries = max_retries
         self.lock = threading.Lock()
         self.cache_file.parent.mkdir(parents=True, exist_ok=True)
         if self.cache_file.exists():
@@ -168,9 +102,7 @@ class LLMBackedSearchGenerator:
             if query in self.cache:
                 return self.cache[query]
 
-        entry = self.query_index.get(query)
-        payload = self._call_llm(query, entry)
-        self._validate_payload(payload, query)
+        payload = self._generate_uncached(query)
 
         with self.lock:
             self.cache[query] = payload
@@ -178,34 +110,63 @@ class LLMBackedSearchGenerator:
                 json.dump(self.cache, f, ensure_ascii=False, indent=2)
         return payload
 
-    def _call_llm(self, query: str, entry: QueryEntry | None) -> dict[str, Any]:
+    def _generate_uncached(self, query: str) -> dict[str, Any]:
+        messages = self._build_messages(query)
+        last_content = ""
+
+        for attempt in range(1, self.max_retries + 1):
+            content = self._chat(messages)
+            last_content = content
+            try:
+                payload = self._parse_payload(content)
+                payload = self._normalize_payload(payload, query)
+                self._validate_payload(payload, query)
+                return payload
+            except Exception as exc:
+                if attempt >= self.max_retries:
+                    break
+                messages.extend(
+                    [
+                        {"role": "assistant", "content": content},
+                        {
+                            "role": "user",
+                            "content": (
+                                "Your previous reply was not valid JSON for the required schema. "
+                                "Return only valid JSON with an `organic` list. No markdown fences, no commentary."
+                            ),
+                        },
+                    ]
+                )
+
+        return self._fallback_payload(query, last_content)
+
+    def _build_messages(self, query: str) -> list[dict[str, str]]:
         system_prompt = (
-            "You simulate a Serper-like web search API for benchmark replay.\n"
+            "You simulate a Serper-like search backend for an agent benchmark.\n"
+            "Use only your internal knowledge to answer the search query.\n"
             "Return only strict JSON with this schema:\n"
             "{\"organic\": [{\"title\": str, \"link\": str, \"date\": str, \"snippet\": str}, ...]}\n"
-            f"Generate exactly {self.top_k} organic results.\n"
-            "The snippets should look like plausible search snippets and support answering the search query.\n"
-            "Do not mention that the results are simulated, benchmarked, or generated from gold reasoning.\n"
-            "Use concise snippets. Dates should look like 'Nov 21, 2024' or 'N/A'.\n"
-            "Every result must contain title, link, date, and snippet."
+            f"Try to produce {self.top_k} organic results.\n"
+            "Each result should look like a plausible web search result snippet that helps answer the query.\n"
+            "Do not say the results are simulated. Do not use markdown. Do not add explanations outside JSON.\n"
+            "If you are uncertain, reflect that in the snippet wording instead of refusing."
         )
         user_prompt = {
             "search_query": query,
-            "origin_task": entry.task if entry else "",
-            "gold_final_answer": entry.final_answer if entry else "",
-            "gold_reasoning": entry.gold_reasoning if entry else "",
-            "notes": (
-                "Use the origin task and gold reasoning only as hidden guidance to infer what the search results "
-                "should reveal. The returned JSON should look like normal web search output."
+            "instructions": (
+                "Generate plausible search results for this query based on your internal knowledge. "
+                "The result list should make it easy for a downstream agent to infer the answer."
             ),
         }
+        return [
+            {"role": "system", "content": system_prompt},
+            {"role": "user", "content": json.dumps(user_prompt, ensure_ascii=False)},
+        ]
 
+    def _chat(self, messages: list[dict[str, str]]) -> str:
         req_body = {
             "model": self.model,
-            "messages": [
-                {"role": "system", "content": system_prompt},
-                {"role": "user", "content": json.dumps(user_prompt, ensure_ascii=False)},
-            ],
+            "messages": messages,
             "temperature": 0,
         }
         req = request.Request(
@@ -226,20 +187,77 @@ class LLMBackedSearchGenerator:
         except Exception as exc:
             raise RuntimeError(f"LLM request failed: {exc}") from exc
 
-        content = raw["choices"][0]["message"]["content"].strip()
-        json_text = self._extract_json_text(content)
-        try:
-            return json.loads(json_text)
-        except json.JSONDecodeError as exc:
-            raise RuntimeError(f"LLM did not return valid JSON: {content}") from exc
+        return raw["choices"][0]["message"]["content"].strip()
+
+    def _parse_payload(self, text: str) -> dict[str, Any]:
+        json_text = self._extract_json_text(text)
+        return json.loads(json_text)
 
     @staticmethod
     def _extract_json_text(text: str) -> str:
-        if text.startswith("```"):
-            parts = text.split("```")
+        stripped = text.strip()
+        if stripped.startswith("```"):
+            parts = stripped.split("```")
             if len(parts) >= 3:
-                return parts[1].replace("json", "", 1).strip()
-        return text
+                stripped = parts[1]
+                if stripped.lstrip().startswith("json"):
+                    stripped = stripped.lstrip()[4:]
+                stripped = stripped.strip()
+
+        start = stripped.find("{")
+        end = stripped.rfind("}")
+        if start != -1 and end != -1 and end > start:
+            return stripped[start:end + 1]
+        return stripped
+
+    def _normalize_payload(self, payload: dict[str, Any], query: str) -> dict[str, Any]:
+        if not isinstance(payload, dict):
+            raise RuntimeError(f"Model output is not a JSON object for query {query!r}.")
+
+        organic = payload.get("organic")
+        if isinstance(organic, dict):
+            organic = [organic]
+        if not isinstance(organic, list):
+            raise RuntimeError(f"Model output misses a valid `organic` list for query {query!r}.")
+
+        normalized = []
+        for idx, item in enumerate(organic, start=1):
+            if not isinstance(item, dict):
+                continue
+            normalized.append(
+                {
+                    "title": str(item.get("title", f"Result {idx} for {query}")).strip() or f"Result {idx} for {query}",
+                    "link": str(item.get("link", self._placeholder_link(query, idx))).strip() or self._placeholder_link(query, idx),
+                    "date": str(item.get("date", "N/A")).strip() or "N/A",
+                    "snippet": str(item.get("snippet", "")).strip() or f"No snippet available for {query}.",
+                }
+            )
+
+        return {"organic": normalized}
+
+    @staticmethod
+    def _placeholder_link(query: str, idx: int) -> str:
+        slug = parse.quote_plus(query[:80])
+        return f"https://search.local/result/{idx}?q={slug}"
+
+    def _fallback_payload(self, query: str, raw_text: str) -> dict[str, Any]:
+        snippet = raw_text.strip().replace("\n", " ")
+        if not snippet:
+            snippet = (
+                "The backend model did not return valid JSON, so this fallback result exposes "
+                "the model's direct answer path instead of structured search evidence."
+            )
+        snippet = snippet[:600]
+        return {
+            "organic": [
+                {
+                    "title": f"Direct answer for: {query}",
+                    "link": self._placeholder_link(query, 1),
+                    "date": "N/A",
+                    "snippet": snippet,
+                }
+            ]
+        }
 
     @staticmethod
     def _validate_payload(payload: dict[str, Any], query: str) -> None:
@@ -276,7 +294,17 @@ class SearchHandler(BaseHTTPRequestHandler):
             payload = self.generator.generate(query)
             self._json_response(200, payload)
         except Exception as exc:
-            self._json_response(500, {"error": str(exc)})
+            fallback_payload = {
+                "organic": [
+                    {
+                        "title": f"Search backend error for: {body.get('q', '') if 'body' in locals() else ''}".strip(),
+                        "link": "https://search.local/error",
+                        "date": "N/A",
+                        "snippet": str(exc),
+                    }
+                ]
+            }
+            self._json_response(200, fallback_payload)
 
     def log_message(self, fmt: str, *args: Any) -> None:
         sys.stderr.write("[serper-sidecar] " + fmt % args + "\n")
@@ -293,9 +321,6 @@ class SearchHandler(BaseHTTPRequestHandler):
 def main() -> None:
     args = parse_args()
     api_key, base_url = load_secret(args.secret_file)
-    query_index = load_query_index(args.dataset)
-    if not query_index:
-        raise RuntimeError("No search query was extracted from the provided dataset files.")
 
     generator = LLMBackedSearchGenerator(
         api_key=api_key,
@@ -303,7 +328,7 @@ def main() -> None:
         model=args.model,
         cache_file=args.cache_file,
         top_k=args.top_k,
-        query_index=query_index,
+        max_retries=args.max_retries,
     )
     SearchHandler.generator = generator
 
@@ -313,9 +338,10 @@ def main() -> None:
             {
                 "status": "ready",
                 "listen": f"http://{args.host}:{args.port}",
-                "indexed_queries": len(query_index),
+                "mode": "query_only_internal_knowledge",
                 "model": args.model,
                 "cache_file": str(Path(args.cache_file).resolve()),
+                "ignored_datasets": len(args.dataset),
             },
             ensure_ascii=False,
         )

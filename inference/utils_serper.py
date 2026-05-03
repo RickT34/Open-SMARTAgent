@@ -66,5 +66,5 @@ def search_serper(query, link=False, num=10):
         print(error)
         return error
 
-# if __name__ == "__main__":
-#     print(search_serper("Who is TR", link=True, num=3))
+if __name__ == "__main__":
+    print(search_serper("Who is TR", link=True, num=3))

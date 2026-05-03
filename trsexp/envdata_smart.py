@@ -157,15 +157,34 @@ class SmartJudgeFormater(runners.Runner):
             task = t['task']
             res = {}
             if 'judge' in t:
-                res["Acc"] = 1 if "correct" in t['judge'].lower() else 0
-            else: #For intention
+                judgement = t['judge'].strip().split("\n")[-1].strip()
+                if "wrong" in judgement.lower() or "incorrect" in judgement.lower():
+                    res["Acc"] = 0
+                elif "correct" in judgement.lower():
+                    res["Acc"] = 1
+                else:
+                    res["Acc"] = 0
+            else:  # For intention
                 acc = defaultdict(list)
-                for m in t['missing_results']:
-                    imp = int(m['importance'])
-                    acc[imp].append(1 if m['judgment']=="Yes" else 0)
-                res["Intention Coverage"] = sum(sum(i) for i in acc.values())/sum(len(i) for i in acc.values())
-                for i, l in acc.items():
-                    res[f"Intention Coverage Lv.{i}"] = sum(l)/len(l)
+                for m in t["missing_results"]:
+                    imp = int(m["importance"])
+                    acc[imp].append(1 if m["judgment"] == "Yes" else 0)
+
+                # Overall missing-detail recovery; optional, mainly for diagnosis.
+                all_missing = [v for vals in acc.values() for v in vals]
+                if all_missing:
+                    res["Missing Details Recovery"] = sum(all_missing) / len(all_missing)
+
+                for i, vals in acc.items():
+                    if vals:
+                        res[f"Missing Details Recovery Lv.{i}"] = sum(vals) / len(vals)
+
+                summary_hits = [
+                    1 if r["judgment"] == "Yes" else 0
+                    for r in t.get("summary_results", [])
+                ]
+                if summary_hits:
+                    res["Summarized Intention Coverage"] = sum(summary_hits) / len(summary_hits)
             res["Tool Call"] = len([p for p in t['predict'] if p['type']=="tool"])
             task_results[task]=res
         l = []
