@@ -36,6 +36,32 @@ runner_inference_tool_prompt = runners.CmdExec(
     name="inference_tool_prompt",
 )
 
+runner_inference_tool_prompt_less = runners.CmdExec(
+    lambda env: [
+        PYTHON,
+        "inference/inference_tool_prompt.py",
+        "--model_name_or_path",
+        env.model.path,
+        "--data_path",
+        env.dataset.path,
+        "--max_seq_length",
+        "4096",
+        "--save_path",
+        env.get_output_path().as_posix(),
+        "--test_start_id",
+        "0",
+        "--max_test_num",
+        "-1",
+        "--method",
+        "mistral" if "mistral" in env.model.name else "llama",
+        "--instruction",
+        "\n\nPlease try to solve the problem without using tools if possible. Only use tools when you are sure that you cannot solve the problem with your own knowledge and reasoning. Remember, the more you rely on your own knowledge and reasoning, the better it is for your learning and growth. So think twice before using any tool, and use them as a last resort."
+    ],
+    [],
+    [Path("result.json")],
+    name="inference_tool_prompt",
+)
+
 
 runner_inference_smart = runners.CmdExec(
     lambda env: [

@@ -139,7 +139,7 @@ def format_steps(steps):
 
 
 
-def preprocess_dataset(data_path, max_num, start_id, method):
+def preprocess_dataset(data_path, max_num, start_id, method, instruction):
     """
     Load and preprocess the dataset by applying the chat template.
     """
@@ -150,7 +150,7 @@ def preprocess_dataset(data_path, max_num, start_id, method):
     dataset = []
     for d in data[start_id:]:
         task = d["input"].split("### Task")[1].split("###")[0].strip()
-        
+        d["instruction"] += instruction
         if method == "mistral":
             messages = [
                 {
@@ -213,7 +213,7 @@ def inference(args):
 
     # Preprocess dataset
     print("Loading and preprocessing dataset...")
-    dataset = preprocess_dataset(args.data_path, max_num=args.max_test_num, start_id=args.test_start_id, method=args.method)
+    dataset = preprocess_dataset(args.data_path, max_num=args.max_test_num, start_id=args.test_start_id, method=args.method, instruction=args.instruction)
     
     if os.path.exists(args.save_path):
         results = json.load(open(args.save_path, "r", encoding="utf-8"))
@@ -354,6 +354,7 @@ def initialize():
     parser.add_argument("--test_start_id", type=int, default=0, help="The start id for testing")
     parser.add_argument("--max_test_num", type=int, default=-1, help="The max number of instances to test")
     parser.add_argument("--method", type=str, default="llama", help="text or message")
+    parser.add_argument("--instruction", type=str, default="", help="text or message")
 
     args = parser.parse_args()
     return args
