@@ -15,6 +15,12 @@ envs_base:list[ExpEnv] = exenv.genEnvs(
         [AlgoNULL],
         "base_tool"
     )
+envs_base_less: list[ExpEnv] = exenv.genEnvs(
+    MODELS_BASE + MODELS_SMART,
+    Datasets_Domain_Tool + Datasets_OOD_Tool,
+    [AlgoNULL],
+    "base_tool_less",
+)
 envs_smart:list[ExpEnv] = exenv.genEnvs(
         MODELS_SMART, 
         Datasets_Domain_Smart+Datasets_OOD_Smart,
@@ -63,7 +69,7 @@ def cross_ansly():
     t = pd.DataFrame(res)
     print(t)
     t.to_csv("outputs/cross_ansly.csv")
-        
+
 def cross_ansly_tool_vs_smart():
     
     envs_base_tool:list[ExpEnv] = exenv.genEnvs(
@@ -115,13 +121,13 @@ def cross_ansly_tool_vs_smart():
 def exp_inference_tool(judge:bool=True):
     if not judge:
         # 0 for a llm user by small vllm model
-        os.environ["CUDA_VISIBLE_DEVICES"] = "1,2,3"
+        os.environ["CUDA_VISIBLE_DEVICES"] = "2,3"
         tasks = exper.gen_tasks(
             envs_base,
             runner_inference_tool_prompt,
         )
         tasks += exper.gen_tasks(
-            envs_base,
+            envs_base_less,
             runner_inference_tool_prompt_less
         )
         tasks += exper.gen_tasks(
@@ -132,7 +138,7 @@ def exp_inference_tool(judge:bool=True):
         ##Judge
         # 0,1,2,3 for a llm judge by big vllm model
         os.environ["CUDA_VISIBLE_DEVICES"] = "0"
-        envs = envs_base + envs_smart
+        envs = envs_base + envs_smart + envs_base_less
         workflow = runners.Workflow(
             "inference_tool_eval",
             [
@@ -188,8 +194,8 @@ def summery():
         t.to_markdown(f)
     t.to_csv("outputs/summery.csv")
 
-exp_inference_tool(False)
-# exp_inference_tool(True)
+# exp_inference_tool(False)
+exp_inference_tool(True)
 # exp_inference_no_tool()
 # summery()
 # cross_ansly()
