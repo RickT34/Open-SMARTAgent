@@ -151,6 +151,11 @@ ModelMistral_7B_SMARTAgent = ModelEnv(
 
 MODELS_BASE = [ModelLLaMA31_8B, ModelMistral_7B, ModelQwen25_7B]
 MODELS_SMART = [ModelLLaMA31_8B_SMARTAgent, ModelMistral_7B_SMARTAgent]
+def get_smart_model(model:ModelEnv):
+    for m in MODELS_SMART:
+        if m.name == model.name + "-smartagent":
+            return m
+    raise ValueError(f"No smart model found for {model.name}")
 
 PROMPT_SMART_JUDGE = """You are a helpful assistant to jusge whether the model's final response (might be word, phrase or sentence) and the given correct answer is same in value.
 - If their intrinsic value of the answer is not equal, please mark it as wrong.
