@@ -111,8 +111,8 @@ PROMPT_SMART_BASE = "You are an advanced assistant designed to solve tasks auton
 
 for file in os.listdir("data_inference"):
     name = f"Dataset_{file.split('.')[0]}"
-    if "time" in name or "mint" in name:
-        continue
+    # if "time" in name or "mint" in name:
+    #     continue
     if "intention" in name:
         domain = "intention"
     elif "math" in name or "gsm" in name:
