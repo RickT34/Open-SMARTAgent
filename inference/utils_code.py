@@ -1,6 +1,7 @@
 import os
 import re
 import subprocess
+import sys
 
 def execute_code(code_text, file_name="../env/tmp.py"):
     # Extract code between the markdown-style triple backticks
@@ -21,7 +22,7 @@ def execute_code(code_text, file_name="../env/tmp.py"):
     # Execute the file and capture the output or errors
     try:
         result = subprocess.run(
-            ["python", file_name],
+            [sys.executable, file_name],
             capture_output=True,
             text=True,
             check=True,

@@ -1,4 +1,5 @@
 import json
+import uuid
 import os
 from vllm import LLM, SamplingParams
 import vllm
@@ -139,7 +140,35 @@ def format_steps(steps):
 
 
 
-def preprocess_dataset(data_path, max_num, start_id, method, instruction):
+def read_prompt_override(prompt_text="", prompt_path=""):
+    if prompt_path:
+        with open(prompt_path, "r", encoding="utf-8") as f:
+            return f.read()
+    if prompt_text:
+        return prompt_text
+    return None
+
+
+def apply_prompt_override(instruction, prompt_override=None, prompt_mode="replace"):
+    if prompt_override is None:
+        return instruction
+    if prompt_mode == "replace":
+        return prompt_override
+    if prompt_mode == "append":
+        return instruction.rstrip() + "\n\n" + prompt_override.lstrip()
+    if prompt_mode == "prepend":
+        return prompt_override.rstrip() + "\n\n" + instruction.lstrip()
+    raise ValueError(f"Unsupported prompt_mode: {prompt_mode}")
+
+
+def preprocess_dataset(
+    data_path,
+    max_num,
+    start_id,
+    method,
+    prompt_override=None,
+    prompt_mode="replace",
+):
     """
     Load and preprocess the dataset by applying the chat template.
     """
@@ -150,19 +179,23 @@ def preprocess_dataset(data_path, max_num, start_id, method, instruction):
     dataset = []
     for d in data[start_id:]:
         task = d["input"].split("### Task")[1].split("###")[0].strip()
-        d["instruction"] += instruction
+        sample_instruction = apply_prompt_override(
+            d["instruction"],
+            prompt_override=prompt_override,
+            prompt_mode=prompt_mode,
+        )
         if method == "mistral":
             messages = [
                 {
                     "role": "user",
-                    "content": d["instruction"].strip() + "\n\n" + d["input"].strip()
+                    "content": sample_instruction.strip() + "\n\n" + d["input"].strip()
                 }
             ]
         elif method == "llama":
             messages = [
                 {
                     "role": "system",
-                    "content": d["instruction"],
+                    "content": sample_instruction,
                 },
                 {
                     "role": "user",
@@ -213,7 +246,15 @@ def inference(args):
 
     # Preprocess dataset
     print("Loading and preprocessing dataset...")
-    dataset = preprocess_dataset(args.data_path, max_num=args.max_test_num, start_id=args.test_start_id, method=args.method, instruction=args.instruction)
+    prompt_override = read_prompt_override(args.prompt_text, args.prompt_path)
+    dataset = preprocess_dataset(
+        args.data_path,
+        max_num=args.max_test_num,
+        start_id=args.test_start_id,
+        method=args.method,
+        prompt_override=prompt_override,
+        prompt_mode=args.prompt_mode,
+    )
     
     if os.path.exists(args.save_path):
         results = json.load(open(args.save_path, "r", encoding="utf-8"))
@@ -236,7 +277,7 @@ def inference(args):
         task = example["task"]
         
         example_count += 1
-        code_file = str(example_count) + "_" + task[:3] + ".py"
+        code_file = str(example_count) + "_" + task[:3] + "_" + str(uuid.uuid4()) + ".py"
         
         if task in existing_tasks:
             continue
@@ -354,7 +395,9 @@ def initialize():
     parser.add_argument("--test_start_id", type=int, default=0, help="The start id for testing")
     parser.add_argument("--max_test_num", type=int, default=-1, help="The max number of instances to test")
     parser.add_argument("--method", type=str, default="llama", help="text or message")
-    parser.add_argument("--instruction", type=str, default="", help="text or message")
+    parser.add_argument("--prompt_text", type=str, default="", help="Override dataset instruction with this prompt text")
+    parser.add_argument("--prompt_path", type=str, default="", help="Override dataset instruction with prompt text read from this file")
+    parser.add_argument("--prompt_mode", type=str, default="replace", choices=["replace", "append", "prepend"], help="How to apply prompt_text/prompt_path to the dataset instruction")
 
     args = parser.parse_args()
     return args

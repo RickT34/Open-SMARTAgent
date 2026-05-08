@@ -1,5 +1,6 @@
 from pathlib import Path
 from lazyexp import exenv, exper, runners
+import dataclasses
 from subprocess import Popen
 import os
 from lazyexp.exenv import *
@@ -9,11 +10,28 @@ from lazyexp.exenv import ExpEnv, Path
 from envdata import *
 from collections import defaultdict
 import json
+import re
 
 TEST_RUN = False
 
-runner_inference_tool_prompt = runners.CmdExec(
-    lambda env: [
+TOOL_LESS_INSTRUCTION = "\n\nPlease try to solve the problem without using tools if possible. Only use tools when you are sure that you cannot solve the problem with your own knowledge and reasoning. Remember, the more you rely on your own knowledge and reasoning, the better it is for your learning and growth. So think twice before using any tool, and use them as a last resort."
+
+
+def _prompt_override_args(env: ExpEnv) -> list[str]:
+    args = []
+    prompt_path = env.algo.tags.get("prompt_path")
+    prompt_text = env.algo.tags.get("prompt_text")
+    if prompt_path:
+        args += ["--prompt_path", str(prompt_path)]
+    elif prompt_text:
+        args += ["--prompt_text", str(prompt_text)]
+    if args:
+        args += ["--prompt_mode", env.algo.tags.get("prompt_mode", "replace")]
+    return args
+
+
+def _inference_tool_prompt_cmd(env: ExpEnv, instruction: str = "") -> list[str]:
+    return [
         PYTHON,
         "inference/inference_tool_prompt.py",
         "--model_name_or_path",
@@ -30,33 +48,20 @@ runner_inference_tool_prompt = runners.CmdExec(
         "-1",
         "--method",
         "mistral" if "mistral" in env.model.name else "llama",
-    ],
+        *_prompt_override_args(env),
+        *(["--instruction", instruction] if instruction else []),
+    ]
+
+
+runner_inference_tool_prompt = runners.CmdExec(
+    lambda env: _inference_tool_prompt_cmd(env),
     [],
     [Path("result.json")],
     name="inference_tool_prompt",
 )
 
 runner_inference_tool_prompt_less = runners.CmdExec(
-    lambda env: [
-        PYTHON,
-        "inference/inference_tool_prompt.py",
-        "--model_name_or_path",
-        env.model.path,
-        "--data_path",
-        env.dataset.path,
-        "--max_seq_length",
-        "4096",
-        "--save_path",
-        env.get_output_path().as_posix(),
-        "--test_start_id",
-        "0",
-        "--max_test_num",
-        "-1",
-        "--method",
-        "mistral" if "mistral" in env.model.name else "llama",
-        "--instruction",
-        "\n\nPlease try to solve the problem without using tools if possible. Only use tools when you are sure that you cannot solve the problem with your own knowledge and reasoning. Remember, the more you rely on your own knowledge and reasoning, the better it is for your learning and growth. So think twice before using any tool, and use them as a last resort."
-    ],
+    lambda env: _inference_tool_prompt_cmd(env, instruction=TOOL_LESS_INSTRUCTION),
     [],
     [Path("result.json")],
     name="inference_tool_prompt",
@@ -79,6 +84,7 @@ runner_inference_smart = runners.CmdExec(
         "0",
         "--max_test_num",
         "-1",
+        *_prompt_override_args(env),
     ],
     [],
     [Path("result.json")],
@@ -137,6 +143,32 @@ for file in os.listdir("data_inference"):
         else:
             Datasets_Domain_Smart.append(d)
 
+def get_dataset_by_name(name:str):
+    res = None
+    for d in Datasets_Domain_Tool+Datasets_Domain_Smart+Datasets_OOD_Tool+Datasets_OOD_Smart:
+        if name in d.name:
+            if res is not None:
+                raise ValueError(f"Multiple datasets found with name {name}")
+            res = d
+    if res is not None:
+        return res
+    raise ValueError(f"No dataset found with name {name}")
+
+def make_prompt_algo(
+    prompt_path: str,
+    mode: str = "replace",
+) -> AlgoEnv:
+    if mode not in {"replace", "append", "prepend"}:
+        raise ValueError(f"Unsupported mode {mode!r}; choose replace/append/prepend")
+    if not os.path.exists(prompt_path):
+        print("Warning: prompt_path does not exist:", prompt_path)
+    tags = {
+            "prompt_mode": mode,
+            "prompt_path": prompt_path,
+        }
+    name = f"Prompt-{Path(prompt_path).stem}-{mode}"
+    return AlgoEnv(name, tags=tags)
+
 
 ModelLLaMA31_8B_SMARTAgent = ModelEnv(
     "llama3.1-8b-smartagent",
@@ -157,6 +189,17 @@ def get_smart_model(model:ModelEnv):
             return m
     raise ValueError(f"No smart model found for {model.name}")
 
+def get_smart_dataset(dataset:DatasetEnv):
+    for d in Datasets_Domain_Smart+Datasets_OOD_Smart:
+        if d.name == dataset.name.replace("tool_prompt", "smart"):
+            return d
+    raise ValueError(f"No smart dataset found for {dataset.name}")
+
+def get_smart_env(env:ExpEnv):
+    model = get_smart_model(env.model)
+    dataset = get_smart_dataset(env.dataset)
+    return ExpEnv(model, dataset, env.algo, "smart_tool")
+
 PROMPT_SMART_JUDGE = """You are a helpful assistant to jusge whether the model's final response (might be word, phrase or sentence) and the given correct answer is same in value.
 - If their intrinsic value of the answer is not equal, please mark it as wrong.
 - If they are just expressed in different format or wording or unit, but have the same main value, please mark it as correct.
@@ -171,12 +214,15 @@ PROMPT_SMART_JUDGE = """You are a helpful assistant to jusge whether the model's
 - Judgment: """
 
 def line_check_judge(model_output, sample):
-    last_line = model_output.strip().split("\n")[-1].strip()
+    judgement = model_output.strip().split("\n")[-1].strip()
     res = {}
-    if last_line in ["Correct", "Wrong"]:
-        res["Acc"] = 1 if last_line=="Correct" else 0
-        return res
-    return None
+    if "wrong" in judgement.lower() or "incorrect" in judgement.lower():
+        res["Acc"] = 0
+    elif "correct" in judgement.lower():
+        res["Acc"] = 1
+    else:
+        return None
+    return res
 
 class SmartJudgeFormater(runners.Runner):
     def __init__(self):
@@ -230,3 +276,11 @@ class SmartJudgeFormater(runners.Runner):
         json.dump(l, exp_env.get_output_path(self.output_paths[0]).open("w"))
             
         
+def translate(name:str):
+    if name.startswith("Dataset_"):
+        for n in ("intention", "math", "time", "mint", "gsm"):
+            if n in name:
+                if n == "gsm":
+                    n = "gsm8k"
+                return n.upper()
+    return name
