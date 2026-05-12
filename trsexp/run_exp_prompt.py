@@ -1,23 +1,26 @@
 from envdata_smart import *
 from envdata import *
+import argparse
+from lazyexp import datapro
+import eval
 
 MODELS = [ModelQwen25_7B, ModelLLaMA31_8B, ModelMistral_7B]
-DATASETS = [get_dataset_by_name("gsm")]
+DATASETS = [get_dataset_by_name("math_tool_prompt")]
 ALGOS = [
     make_prompt_algo(path.as_posix(), mode="replace")
-    for path in Path("Open-SMARTAgent/prompts/tool_prompt_ablation/controlled_gsm").glob("tools_*.txt")
+    for path in Path("prompts/tool_prompt_ablation/controlled_math").glob("tools_*.txt")
 ]
+envs = exenv.genEnvs(
+    MODELS,
+    DATASETS,
+    ALGOS,
+    "tool_prompt_ratio"
+)
 
 def test_tool_example_ratio(judge:bool=False):
-    envs = exenv.genEnvs(
-        MODELS,
-        DATASETS,
-        ALGOS,
-        "tool_prompt_ratio"
-    )
     if not judge:
         # 0 for a llm user by small vllm model
-        os.environ["CUDA_VISIBLE_DEVICES"] = "2,3"
+        os.environ["CUDA_VISIBLE_DEVICES"] = "0,1,2,3"
         tasks = exper.gen_tasks(
             envs,
             runner_inference_tool_prompt,
@@ -46,4 +49,22 @@ def test_tool_example_ratio(judge:bool=False):
         )
     exper.run_tasks(tasks, ui=False)
 
-    
+
+def get_summery_table(envs:list[ExpEnv]):
+    def process_fc(envs:list[ExpEnv]):
+        assert len(envs) == 1
+        res = json.load(envs[0].get_output_path("summery.json").open())
+        res.update(eval.tool_harm_info(envs[0]))
+        return res
+    return datapro.extable(envs, (datapro.ExpAxis.ModelAxis, datapro.ExpAxis.DatasetAxis, datapro.ExpAxis.AlgoAxis), process_fc)
+
+if __name__ == "__main__":
+    parser = argparse.ArgumentParser()
+    parser.add_argument("--run", type=str, choices=["ratio", "summery"], default="ratio")
+    parser.add_argument("--judge", action="store_true")
+    args = parser.parse_args()
+    if args.run == "summery":
+        t = get_summery_table(envs)
+        print(t)
+    elif args.run == "ratio":
+        test_tool_example_ratio(judge=args.judge)

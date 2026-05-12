@@ -4,7 +4,7 @@ from subprocess import Popen
 import sys
 from lazyexp import runners, exper
 
-DIR_DATA = "/share/trsdata/trsdata"
+DIR_DATA = "/share/trsdata"
 
 ModelLLaMA31_8B = ModelEnv(
     "llama3.1-8b",

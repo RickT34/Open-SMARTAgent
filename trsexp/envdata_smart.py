@@ -39,7 +39,7 @@ def _inference_tool_prompt_cmd(env: ExpEnv, instruction: str = "") -> list[str]:
         "--data_path",
         env.dataset.path,
         "--max_seq_length",
-        "4096",
+        "8192",
         "--save_path",
         env.get_output_path().as_posix(),
         "--test_start_id",
@@ -284,3 +284,26 @@ def translate(name:str):
                     n = "gsm8k"
                 return n.upper()
     return name
+
+def get_base_model(model:ModelEnv):
+    for m in MODELS_BASE:
+        if m.name == model.name:
+            return m
+    for m in MODELS_SMART:
+        if m.name == model.name + "-smartagent":
+            return m
+    raise ValueError(f"No base model found for {model.name}")
+
+def get_base_dataset(dataset:DatasetEnv):
+    for d in Datasets_Domain_Tool+Datasets_OOD_Tool:
+        if d.name == dataset.name:
+            return d
+    for d in Datasets_Domain_Smart+Datasets_OOD_Smart:
+        if d.name == dataset.name.replace("smart", "tool_prompt"):
+            return d
+    raise ValueError(f"No base dataset found for {dataset.name}")
+    
+
+def get_no_tool_env(env:ExpEnv):
+    return ExpEnv(env.model,get_base_dataset(env.dataset), AlgoNULL, f"base_no_tool")
+

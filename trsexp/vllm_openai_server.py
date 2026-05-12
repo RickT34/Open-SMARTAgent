@@ -21,7 +21,7 @@ PROXY_HOST = "127.0.0.1"
 PROXY_PORT = 9000
 REQUEST_TIMEOUT = 6000
 WAIT_BACKEND_TIMEOUT = 18000
-DIR_DATA = "/share/trsdata/trsdata"
+DIR_DATA = "/share/trsdata"
 THINKING = True
 
 BACKENDS = {
