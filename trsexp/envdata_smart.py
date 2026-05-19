@@ -30,7 +30,8 @@ def _prompt_override_args(env: ExpEnv) -> list[str]:
     return args
 
 
-def _inference_tool_prompt_cmd(env: ExpEnv, instruction: str = "") -> list[str]:
+def _inference_tool_prompt_cmd(env: ExpEnv, environ: dict, instruction: str = "") -> list[str]:
+    runners._vllm_set_environ(environ)
     return [
         PYTHON,
         "inference/inference_tool_prompt.py",
@@ -54,14 +55,14 @@ def _inference_tool_prompt_cmd(env: ExpEnv, instruction: str = "") -> list[str]:
 
 
 runner_inference_tool_prompt = runners.CmdExec(
-    lambda env: _inference_tool_prompt_cmd(env),
+    lambda env, environ: _inference_tool_prompt_cmd(env, environ),
     [],
     [Path("result.json")],
     name="inference_tool_prompt",
 )
 
 runner_inference_tool_prompt_less = runners.CmdExec(
-    lambda env: _inference_tool_prompt_cmd(env, instruction=TOOL_LESS_INSTRUCTION),
+    lambda env, environ: _inference_tool_prompt_cmd(env, environ, instruction=TOOL_LESS_INSTRUCTION),
     [],
     [Path("result.json")],
     name="inference_tool_prompt",
@@ -69,7 +70,7 @@ runner_inference_tool_prompt_less = runners.CmdExec(
 
 
 runner_inference_smart = runners.CmdExec(
-    lambda env: [
+    lambda env, _: [
         PYTHON,
         "inference/inference_smart.py",
         "--model_name_or_path",
@@ -93,7 +94,7 @@ runner_inference_smart = runners.CmdExec(
 
 
 runner_inference_eval = runners.CmdExec(
-    lambda env: [
+    lambda env, _: [
         PYTHON,
         f"evaluate/inference_eval_{env.dataset.tags['domain']}.py",
         "--data_path",
