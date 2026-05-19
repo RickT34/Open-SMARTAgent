@@ -4,7 +4,7 @@ import argparse
 from lazyexp import datapro
 import eval
 
-MODELS = [ModelQwen25_7B, ModelLLaMA31_8B, ModelMistral_7B]
+MODELS = [ModelQwen25_7B, ModelLLaMA31_8B, ModelMistral_7B, ModelQwen35_27B]
 DATASETS = [get_dataset_by_name("math_tool_prompt")]
 ALGOS = [
     make_prompt_algo(path.as_posix(), mode="replace")
@@ -20,7 +20,6 @@ envs = exenv.genEnvs(
 def test_tool_example_ratio(judge:bool=False):
     if not judge:
         # 0 for a llm user by small vllm model
-        os.environ["CUDA_VISIBLE_DEVICES"] = "0,1,2,3"
         tasks = exper.gen_tasks(
             envs,
             runner_inference_tool_prompt,

@@ -311,6 +311,7 @@ def inference(args):
 
                 result = llm.chat(input_messages, sampling_params)
                 assistant_output = result[0].outputs[0].text.strip()
+                assistant_output = assistant_output.split("</think>")[-1].strip()
                 
                 raw.append(assistant_output)
                 

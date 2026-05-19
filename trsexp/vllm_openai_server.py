@@ -14,7 +14,7 @@ import os
 # =========================
 # 你主要只需要改这里
 # =========================
-os.environ["CUDA_VISIBLE_DEVICES"] = "0,1,2,3"
+# os.environ["CUDA_VISIBLE_DEVICES"] = "0,1,2,3"
 
 API_KEYS = ["local"]
 PROXY_HOST = "127.0.0.1"
